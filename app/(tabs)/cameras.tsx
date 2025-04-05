@@ -1,40 +1,57 @@
 import { View, StyleSheet, ScrollView, Text, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useState } from 'react';
-import { Camera, ChevronRight, Shield, AlertCircle } from 'lucide-react-native';
+import { Camera, ChevronRight, Shield, AlertCircle, Video, Square } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 export default function CamerasScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedCamera, setSelectedCamera] = useState<number | null>(null);
-  
-  const cameras = [
+  const [recordingCameras, setRecordingCameras] = useState<number[]>([]);
+  const [cameras, setCameras] = useState([
     { 
       id: 1, 
       url: 'http://91.210.87.140:8082/mjpg/video.mjpg', 
       title: 'Подъезд №1',
       status: 'online',
-      location: 'Вход в подъезд',
-      lastUpdate: '2 мин назад'
+      location: 'Вход в подъезд'
     },
     { 
       id: 2, 
       url: 'http://78.36.19.87/mjpg/video.mjpg', 
       title: 'Парковка',
       status: 'offline',
-      location: 'Внутренний двор',
-      lastUpdate: '5 мин назад'
+      location: 'Внутренний двор'
     },
     { 
       id: 3, 
       url: 'http://91.210.87.140:8081/mjpg/video.mjpg', 
       title: 'Детская площадка',
       status: 'online',
-      location: 'Внутренний двор',
-      lastUpdate: '1 мин назад'
+      location: 'Внутренний двор'
     },
-  ];
+  ]);
+
+  const handleCameraPress = (cameraId: number) => {
+    if (selectedCamera === cameraId) {
+      setSelectedCamera(null);
+    } else {
+      setSelectedCamera(cameraId);
+    }
+  };
+
+  const handleRecordPress = (cameraId: number) => {
+    setRecordingCameras(prev => {
+      if (prev.includes(cameraId)) {
+        // Останавливаем запись
+        return prev.filter(id => id !== cameraId);
+      } else {
+        // Начинаем запись
+        return [...prev, cameraId];
+      }
+    });
+  };
 
   const htmlContent = (url: string) => `
     <!DOCTYPE html>
@@ -105,21 +122,41 @@ export default function CamerasScreen() {
             styles.cameraContainer,
             selectedCamera === camera.id && styles.selectedCamera
           ]}
-          onPress={() => setSelectedCamera(selectedCamera === camera.id ? null : camera.id)}
+          onPress={() => handleCameraPress(camera.id)}
         >
           <View style={styles.cameraHeader}>
             <View style={styles.cameraTitleContainer}>
               <Text style={styles.cameraTitle}>{camera.title}</Text>
               <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(camera.status) }]} />
             </View>
-            <ChevronRight 
-              size={20} 
-              color="#8E8E93"
-              style={[
-                styles.chevron,
-                selectedCamera === camera.id && styles.chevronRotated
-              ]}
-            />
+            <View style={styles.headerControls}>
+              {selectedCamera === camera.id && (
+                <TouchableOpacity 
+                  style={[
+                    styles.recordButton,
+                    recordingCameras.includes(camera.id) && styles.recordingButtonActive
+                  ]}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleRecordPress(camera.id);
+                  }}
+                >
+                  {recordingCameras.includes(camera.id) ? (
+                    <Square size={16} color="#FFFFFF" />
+                  ) : (
+                    <Video size={16} color="#FFFFFF" />
+                  )}
+                </TouchableOpacity>
+              )}
+              <ChevronRight 
+                size={20} 
+                color="#8E8E93"
+                style={[
+                  styles.chevron,
+                  selectedCamera === camera.id && styles.chevronRotated
+                ]}
+              />
+            </View>
           </View>
 
           <View style={styles.cameraInfo}>
@@ -127,10 +164,12 @@ export default function CamerasScreen() {
               <Text style={styles.infoLabel}>Расположение:</Text>
               <Text style={styles.infoValue}>{camera.location}</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Обновлено:</Text>
-              <Text style={styles.infoValue}>{camera.lastUpdate}</Text>
-            </View>
+            {recordingCameras.includes(camera.id) && (
+              <View style={styles.recordingIndicator}>
+                <View style={styles.recordingDot} />
+                <Text style={styles.recordingText}>Запись...</Text>
+              </View>
+            )}
           </View>
 
           {selectedCamera === camera.id && (
@@ -217,6 +256,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  headerControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   cameraTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -277,5 +321,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#8E8E93',
     marginLeft: 8,
+  },
+  recordButton: {
+    backgroundColor: '#FF3B30',
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recordingButtonActive: {
+    backgroundColor: '#34C759',
+  },
+  recordingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFE5E5',
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  recordingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF3B30',
+    marginRight: 8,
+  },
+  recordingText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    fontWeight: '500',
   },
 });
