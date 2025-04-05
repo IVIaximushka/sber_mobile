@@ -1,12 +1,41 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { User, Chrome as Home, Bell, Shield, LogOut } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
+import { useAuth } from '../../lib/authContext';
+import { supabase } from '../../lib/supabase';
 
 export default function ProfileScreen() {
+  const { state } = useAuth();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Используем данные профиля из Supabase, если они доступны
   const userInfo = {
-    name: 'Иван Петров',
+    name: state.user?.user_metadata?.username || 'Пользователь',
     apartment: '42',
     phone: '+7 (999) 123-45-67',
-    email: 'ivan.petrov@example.com',
+    email: state.user?.email || 'Нет данных',
+  };
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      
+      // Выход из аккаунта через Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+
+      // Перенаправление на экран входа
+      router.replace('/(auth)/signin');
+    } catch (error) {
+      Alert.alert('Ошибка', (error as Error).message);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   return (
@@ -47,9 +76,15 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
-        <LogOut size={24} color="#FF3B30" />
-        <Text style={styles.logoutText}>Выйти</Text>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={isLoggingOut}>
+        {isLoggingOut ? (
+          <ActivityIndicator color="#FF3B30" size="small" />
+        ) : (
+          <>
+            <LogOut size={24} color="#FF3B30" />
+            <Text style={styles.logoutText}>Выйти</Text>
+          </>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );

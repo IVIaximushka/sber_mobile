@@ -6,7 +6,7 @@ interface Props {
   mode: 'signIn' | 'signUp';
 }
 
-export const AuthSwitcher: React.FC<Props> = ({ mode }) => {
+const AuthSwitcher: React.FC<Props> = ({ mode }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
@@ -45,4 +45,7 @@ const styles = StyleSheet.create({
     color: '#3498db',
     fontWeight: 'bold',
   },
-}); 
+});
+
+export { AuthSwitcher };
+export default AuthSwitcher; 

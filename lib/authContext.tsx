@@ -1,24 +1,36 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from './supabase';
-import { AuthState, User } from './types';
-import { Session, Provider } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
+import { Alert } from 'react-native';
+
+interface AuthState {
+  user: User | null;
+  session: Session | null;
+  loading: boolean;
+}
 
 interface AuthContextProps {
   state: AuthState;
-  signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  updatePassword: (password: string) => Promise<void>;
-  verifyOtp: (email: string, token: string) => Promise<void>;
-  signInWithProvider: (provider: Provider) => Promise<void>;
-  updateProfile: (data: { username?: string, avatar_url?: string }) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   getProfile: () => Promise<any>;
+  updateProfile: (data: { username?: string; avatar_url?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
@@ -26,152 +38,139 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
 
   useEffect(() => {
-    // Проверка текущей сессии
+    // Получить текущую сессию при загрузке
     supabase.auth.getSession().then(({ data: { session } }) => {
       setState(prev => ({ 
         ...prev, 
         session,
         user: session?.user || null,
-        loading: false
+        loading: false,
       }));
     });
 
-    // Подписка на изменения аутентификации
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+    // Установить слушатель изменений состояния аутентификации
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
         setState(prev => ({ 
           ...prev, 
           session,
           user: session?.user || null,
-          loading: false
+          loading: false,
         }));
       }
     );
 
     return () => {
-      subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
-  const signIn = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
   const signOut = async () => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.signOut();
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
   const resetPassword = async (email: string) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'myapp://reset-password',
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
-  const updatePassword = async (password: string) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.updateUser({
-      password,
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
-  };
-
-  const verifyOtp = async (email: string, token: string) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: 'email',
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
-  };
-
-  const signInWithProvider = async (provider: Provider) => {
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: 'myapp://auth/callback',
-      },
-    });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
-  };
-
-  const updateProfile = async (data: { username?: string, avatar_url?: string }) => {
-    if (!state.user) throw new Error('Пользователь не аутентифицирован');
-
-    setState(prev => ({ ...prev, loading: true }));
-    const { error } = await supabase
-      .from('profiles')
-      .upsert({
-        id: state.user.id,
-        updated_at: new Date().toISOString(),
-        ...data,
+  const updatePassword = async (newPassword: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
       });
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
   const getProfile = async () => {
-    if (!state.user) throw new Error('Пользователь не аутентифицирован');
+    try {
+      if (!state.user) throw new Error('User not authenticated');
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', state.user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      return data;
+    } catch (error: any) {
+      console.error('Ошибка при получении профиля:', error.message);
+      return null;
+    }
+  };
 
-    setState(prev => ({ ...prev, loading: true }));
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', state.user.id)
-      .single();
-    setState(prev => ({ ...prev, loading: false }));
-    if (error) throw error;
-    return data;
+  const updateProfile = async (data: { username?: string; avatar_url?: string }) => {
+    try {
+      if (!state.user) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...data,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', state.user.id);
+      
+      if (error) throw error;
+    } catch (error: any) {
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      state, 
-      signUp, 
-      signIn, 
-      signOut, 
-      resetPassword, 
-      updatePassword, 
-      verifyOtp,
-      signInWithProvider,
-      updateProfile,
-      getProfile
-    }}>
+    <AuthContext.Provider
+      value={{
+        state,
+        signIn,
+        signUp,
+        signOut,
+        resetPassword,
+        updatePassword,
+        getProfile,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }; 

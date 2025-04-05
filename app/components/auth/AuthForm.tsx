@@ -8,18 +8,18 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import { useAuth } from '../../../lib/authContext';
-import { Link } from 'expo-router';
+import { supabase } from '../../../lib/supabase';
+import { Link, useRouter } from 'expo-router';
 
 interface Props {
   mode: 'signIn' | 'signUp';
 }
 
-export const AuthForm: React.FC<Props> = ({ mode }) => {
+const AuthForm: React.FC<Props> = ({ mode }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, signUp, state } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     if (email.trim() === '' || password.trim() === '') {
@@ -30,14 +30,38 @@ export const AuthForm: React.FC<Props> = ({ mode }) => {
     setIsSubmitting(true);
     try {
       if (mode === 'signIn') {
-        await signIn(email, password);
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        // После успешного входа явно перенаправляем на экран успешной авторизации
+        router.push('/(auth)/auth-success');
       } else {
-        await signUp(email, password);
-        await signIn(email, password);
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
         Alert.alert(
           'Регистрация успешна', 
-          'Ваш аккаунт успешно создан и вы вошли в систему.'
+          'Ваш аккаунт успешно создан, выполняется вход в систему.'
         );
+        
+        // После успешной регистрации выполняем вход
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (signInError) throw signInError;
+        
+        // После успешного входа явно перенаправляем на экран успешной авторизации
+        router.push('/(auth)/auth-success');
       }
     } catch (error) {
       Alert.alert('Ошибка', (error as Error).message);
@@ -128,4 +152,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-}); 
+});
+
+export { AuthForm };
+export default AuthForm; 
