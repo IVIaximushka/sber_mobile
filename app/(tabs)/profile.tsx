@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
 
+const PRIMARY_COLOR = '#006D3B';
+
 export default function ProfileScreen() {
   const { state } = useAuth();
   const router = useRouter();
@@ -63,15 +65,15 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Настройки</Text>
         <TouchableOpacity style={styles.menuItem}>
-          <Home size={24} color="#007AFF" />
+          <Home size={24} color={PRIMARY_COLOR} />
           <Text style={styles.menuText}>Данные о квартире</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Bell size={24} color="#007AFF" />
+          <Bell size={24} color={PRIMARY_COLOR} />
           <Text style={styles.menuText}>Уведомления</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Shield size={24} color="#007AFF" />
+          <Shield size={24} color={PRIMARY_COLOR} />
           <Text style={styles.menuText}>Безопасность</Text>
         </TouchableOpacity>
       </View>
@@ -93,26 +95,34 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     backgroundColor: '#FFFFFF',
     padding: 24,
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
   },
   avatarPlaceholder: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#007AFF',
+    backgroundColor: PRIMARY_COLOR,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   userName: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 4,
+    color: '#1A1A1A',
   },
   userApartment: {
     fontSize: 16,
@@ -120,16 +130,21 @@ const styles = StyleSheet.create({
   },
   section: {
     backgroundColor: '#FFFFFF',
-    padding: 16,
+    padding: 20,
     marginTop: 16,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#1A1A1A',
   },
   infoItem: {
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
   },
   infoLabel: {
     fontSize: 14,
@@ -138,17 +153,19 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
+    color: '#1A1A1A',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
   },
   menuText: {
     fontSize: 16,
     marginLeft: 12,
+    color: '#1A1A1A',
   },
   logoutButton: {
     flexDirection: 'row',
@@ -157,6 +174,13 @@ const styles = StyleSheet.create({
     padding: 16,
     marginTop: 16,
     marginBottom: 32,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   logoutText: {
     fontSize: 16,

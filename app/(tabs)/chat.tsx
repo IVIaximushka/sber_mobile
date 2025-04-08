@@ -1,9 +1,12 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Send } from 'lucide-react-native';
+import { Send, Search } from 'lucide-react-native';
 import { useState } from 'react';
+
+const PRIMARY_COLOR = '#006D3B';
 
 export default function ChatScreen() {
   const [message, setMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const messages = [
     {
@@ -31,6 +34,16 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Поиск в чате..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
       <ScrollView style={styles.messagesContainer}>
         {messages.map((msg) => (
           <View key={msg.id} style={styles.messageCard}>
@@ -63,7 +76,26 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#F2F2F7',
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1A1A1A',
   },
   messagesContainer: {
     flex: 1,
@@ -72,8 +104,13 @@ const styles = StyleSheet.create({
   messageCard: {
     backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   messageHeader: {
     flexDirection: 'row',
@@ -82,7 +119,8 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#1A1A1A',
   },
   apartmentNumber: {
     fontSize: 14,
@@ -92,6 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     marginBottom: 8,
+    color: '#1A1A1A',
   },
   messageTime: {
     fontSize: 12,
@@ -113,12 +152,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 8,
     maxHeight: 100,
+    fontSize: 16,
+    color: '#1A1A1A',
   },
   sendButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
   },
