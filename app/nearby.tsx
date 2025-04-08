@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
 import { Store, Utensils, Dumbbell, Scissors, ChevronLeft, MapPin } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
@@ -9,14 +9,62 @@ export default function NearbyScreen() {
   const router = useRouter();
 
   const nearbyPlaces = [
-    { id: 1, title: 'Продуктовый', icon: Store, distance: '0.2 км', type: 'store', address: 'ул. Ленина, 10' },
-    { id: 2, title: 'Ресторан', icon: Utensils, distance: '0.3 км', type: 'restaurant', address: 'пр. Мира, 25' },
-    { id: 3, title: 'Фитнес', icon: Dumbbell, distance: '0.5 км', type: 'fitness', address: 'ул. Гагарина, 15' },
-    { id: 4, title: 'Салон', icon: Scissors, distance: '0.4 км', type: 'beauty', address: 'ул. Пушкина, 8' },
-    { id: 5, title: 'Аптека', icon: Store, distance: '0.6 км', type: 'pharmacy', address: 'пр. Ленина, 45' },
-    { id: 6, title: 'Кофейня', icon: Utensils, distance: '0.3 км', type: 'cafe', address: 'ул. Мира, 12' },
-    { id: 7, title: 'Йога', icon: Dumbbell, distance: '0.7 км', type: 'fitness', address: 'ул. Гагарина, 20' },
-    { id: 8, title: 'Маникюр', icon: Scissors, distance: '0.5 км', type: 'beauty', address: 'ул. Пушкина, 15' },
+    {
+      id: '1',
+      title: 'Магнит',
+      type: 'store',
+      distance: '0.2 км',
+      address: 'ул. Ленина, 10',
+      image: require('../assets/images/magnit.jpg'),
+    },
+    {
+      id: '2',
+      title: 'Пятерочка',
+      type: 'store',
+      distance: '0.3 км',
+      address: 'ул. Ленина, 15',
+      image: require('../assets/images/pyaterochka.jpg'),
+    },
+    {
+      id: '3',
+      title: 'Суши Роллы',
+      type: 'restaurant',
+      distance: '0.5 км',
+      address: 'ул. Ленина, 20',
+      image: require('../assets/images/sushi.jpg'),
+    },
+    {
+      id: '4',
+      title: 'Салон красоты Оксана',
+      type: 'beauty',
+      distance: '0.4 км',
+      address: 'ул. Ленина, 25',
+      image: require('../assets/images/salon.jpg'),
+    },
+    { 
+      id: '5', 
+      title: 'Азиатский стиль', 
+      distance: '0.7 км', 
+      type: 'restaurant', 
+      address: 'пр. Мира, 25',
+      image: require('../assets/images/rest.jpg'),
+    },
+    { 
+      id: '6', 
+      title: 'Спортзал Джим Джим', 
+      distance: '0.5 км', 
+      type: 'fitness', 
+      address: 'ул. Гагарина, 15',
+      image: require('../assets/images/gym.jpg'),
+    },
+    { 
+      id:'7', 
+      title: 'Аптека Плюс', 
+      distance: '0.6 км', 
+      type: 'pharmacy', 
+      address: 'пр. Ленина, 45',
+      image: require('../assets/images/pharmacy.jpg'),
+    }
   ];
 
   return (
@@ -30,9 +78,7 @@ export default function NearbyScreen() {
             <TouchableOpacity 
               key={place.id} 
               style={styles.placeCard}>
-              <View style={styles.placeIconContainer}>
-                <place.icon size={24} color={PRIMARY_COLOR} />
-              </View>
+              <Image source={place.image} style={styles.placeImage} />
               <View style={styles.placeInfo}>
                 <Text style={styles.placeTitle}>{place.title}</Text>
                 <View style={styles.placeDetails}>
@@ -125,5 +171,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: PRIMARY_COLOR,
     fontWeight: '500',
+  },
+  placeImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 8,
+    marginBottom: 12,
   },
 }); 

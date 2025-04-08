@@ -1,10 +1,45 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
 import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#006D3B';
 const { width } = Dimensions.get('window');
+
+const nearbyServices = [
+  {
+    id: '1',
+    title: 'Магнит',
+    type: 'store',
+    distance: '0.2 км',
+    address: 'ул. Ленина, 10',
+    image: require('../../assets/images/magnit.jpg'),
+  },
+  {
+    id: '2',
+    title: 'Пятерочка',
+    type: 'store',
+    distance: '0.3 км',
+    address: 'ул. Ленина, 15',
+    image: require('../../assets/images/pyaterochka.jpg'),
+  },
+  {
+    id: '3',
+    title: 'Суши Роллы',
+    type: 'restaurant',
+    distance: '0.5 км',
+    address: 'ул. Ленина, 20',
+    image: require('../../assets/images/sushi.jpg'),
+  },
+  {
+    id: '4',
+    title: 'Салон красоты Оксана',
+    type: 'beauty',
+    distance: '0.4 км',
+    address: 'ул. Ленина, 25',
+    image: require('../../assets/images/salon.jpg'),
+  },
+];
 
 const realEstateListings = [
   {
@@ -14,7 +49,7 @@ const realEstateListings = [
     area: '65 м²',
     floor: '5/9 этаж',
     address: 'ул. Ленина, 10',
-    image: '#E5F3FF',
+    image: require('../../assets/images/apartment1.jpg'),
   },
   {
     id: '2',
@@ -23,10 +58,26 @@ const realEstateListings = [
     area: '35 м²',
     floor: '3/9 этаж',
     address: 'ул. Ленина, 10',
-    image: '#FFF3E5',
+    image: require('../../assets/images/apartment2.jpg'),
   },
 ];
 
+const managementAnnouncements = [
+  {
+    id: '1',
+    title: 'Ремонт лифта',
+    date: '15 марта',
+    description: 'Плановый ремонт лифта №2',
+    image: require('../../assets/images/elevator.jpg'),
+  },
+  {
+    id: '2',
+    title: 'Уборка территории',
+    date: '20 марта',
+    description: 'Генеральная уборка придомовой территории',
+    image: require('../../assets/images/cleaning.jpg'),
+  },
+];
 
 const promotions = [
   {
@@ -34,14 +85,14 @@ const promotions = [
     title: 'Скидка на парковку',
     discount: '20%',
     description: 'При оплате за 6 месяцев',
-    image: '#FFE5F3',
+    image: require('../../assets/images/parking.jpg'),
   },
   {
     id: '2',
     title: 'Бесплатный вывоз мусора',
     discount: '100%',
     description: 'При сдаче макулатуры',
-    image: '#E5FFE5',
+    image: require('../../assets/images/recycling.jpg'),
   },
 ];
 
@@ -80,7 +131,7 @@ export default function HomeScreen() {
       time: '19:00',
       location: 'Клубная гостиная',
       participants: 12,
-      color: '#E5F3FF',
+      image: require('../../assets/images/meeting.jpg'),
     },
     {
       id: 2,
@@ -89,7 +140,7 @@ export default function HomeScreen() {
       time: '10:00 - 18:00',
       location: 'Лифт №2',
       participants: 0,
-      color: '#FFF3E5',
+      image: require('../../assets/images/elevator.jpg'),
     },
     {
       id: 3,
@@ -98,15 +149,8 @@ export default function HomeScreen() {
       time: '09:00',
       location: 'Придомовая территория',
       participants: 5,
-      color: '#E5FFE5',
+      image: require('../../assets/images/cleaning.jpg'),
     },
-  ];
-
-  const nearbyServices = [
-    { id: 1, title: 'Продуктовый', icon: Store, distance: '0.2 км', type: 'store' },
-    { id: 2, title: 'Ресторан', icon: Utensils, distance: '0.3 км', type: 'restaurant' },
-    { id: 3, title: 'Фитнес', icon: Dumbbell, distance: '0.5 км', type: 'fitness' },
-    { id: 4, title: 'Салон', icon: Scissors, distance: '0.4 км', type: 'beauty' },
   ];
 
   const renderSection = (title: string, items: any[], icon: any, onPress: () => void) => (
@@ -124,7 +168,7 @@ export default function HomeScreen() {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
         {items.map((item) => (
           <TouchableOpacity key={item.id} style={styles.card}>
-            <View style={[styles.cardImage, { backgroundColor: item.image }]} />
+            <Image source={item.image} style={styles.cardImage} />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               {item.price && <Text style={styles.cardPrice}>{item.price}</Text>}
@@ -132,6 +176,7 @@ export default function HomeScreen() {
               {item.address && <Text style={styles.cardAddress}>{item.address}</Text>}
               {item.date && <Text style={styles.cardDate}>{item.date}</Text>}
               {item.description && <Text style={styles.cardDescription}>{item.description}</Text>}
+              {item.distance && <Text style={styles.cardDistance}>{item.distance}</Text>}
               {item.discount && (
                 <View style={styles.discountContainer}>
                   <Text style={styles.discountText}>{item.discount}</Text>
@@ -202,7 +247,7 @@ export default function HomeScreen() {
           <TouchableOpacity 
             style={styles.viewAllButton}
             onPress={() => router.push('/nearby')}>
-            <Text style={styles.viewAllText}>Все услуги</Text>
+            <Text style={styles.viewAllText}>Посмотреть</Text>
             <ChevronRight size={20} color={PRIMARY_COLOR} />
           </TouchableOpacity>
         </View>
@@ -217,7 +262,7 @@ export default function HomeScreen() {
               key={service.id} 
               style={styles.serviceCard}
               onPress={() => router.push('/nearby')}>
-              <service.icon size={24} color={PRIMARY_COLOR} />
+              <Image source={service.image} style={styles.serviceImage} />
               <Text style={styles.serviceTitle}>{service.title}</Text>
               <Text style={styles.serviceDistance}>{service.distance}</Text>
             </TouchableOpacity>
@@ -236,7 +281,7 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Объявления УК</Text>
         {announcements.map((announcement) => (
           <TouchableOpacity key={announcement.id} style={styles.announcementCard}>
-            <View style={[styles.announcementImage, { backgroundColor: announcement.color }]} />
+            <Image source={announcement.image} style={styles.announcementImage} />
             <View style={styles.announcementContent}>
               <Text style={styles.announcementTitle}>{announcement.title}</Text>
               <View style={styles.announcementDetails}>
@@ -265,7 +310,7 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {renderSection('Объявления', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
+      {renderSection('Объявления о продаже', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
       {renderSection('Акции и скидки', promotions, <Percent size={20} color={PRIMARY_COLOR} />, () => {})}
     </ScrollView>
   );
@@ -376,6 +421,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  serviceImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
   serviceTitle: {
     fontSize: 16,
     fontWeight: '500',
@@ -424,6 +475,8 @@ const styles = StyleSheet.create({
   announcementImage: {
     width: 100,
     height: 100,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
   },
   announcementContent: {
     flex: 1,
@@ -544,6 +597,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   cardImage: {
+    width: '100%',
     height: 120,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
@@ -581,6 +635,11 @@ const styles = StyleSheet.create({
   cardDescription: {
     fontSize: 14,
     color: '#8E8E93',
+  },
+  cardDistance: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginTop: 4,
   },
   discountContainer: {
     position: 'absolute',
