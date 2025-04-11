@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Droplet, Zap, Flame, Thermometer, Wrench, Brush, ChevronRight } from 'lucide-react-native';
 
-const PRIMARY_COLOR = '#006D3B';
+const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ServicesScreen() {
   const utilities = [
@@ -74,12 +74,12 @@ const styles = StyleSheet.create({
   },
   utilityCard: {
     width: '48%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffd6e1',
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 
 import { Send, Search } from 'lucide-react-native';
 import { useState } from 'react';
 
-const PRIMARY_COLOR = '#006D3B';
+const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ChatScreen() {
   const [message, setMessage] = useState('');
@@ -35,13 +35,14 @@ export default function ChatScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <Search size={20} color="#8E8E93" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Поиск в чате..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+        <View style={styles.searchInputContainer}>
+          <Search size={20} color={PRIMARY_COLOR} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Поиск чатов"
+            placeholderTextColor="#8E8E93"
+          />
+        </View>
       </View>
 
       <ScrollView style={styles.messagesContainer}>
@@ -78,23 +79,37 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  header: {
+    backgroundColor: PRIMARY_COLOR,
+    padding: 20,
+    paddingTop: 60,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
   searchContainer: {
+    backgroundColor: `${PRIMARY_COLOR}10`,
+    padding: 16,
+  },
+  searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F2F2F7',
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
-  },
-  searchIcon: {
-    marginRight: 8,
+    padding: 12,
+    shadowColor: '#5a2a37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
+    marginLeft: 8,
     color: '#1A1A1A',
   },
   messagesContainer: {
@@ -106,7 +121,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -162,5 +177,21 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  chatItem: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: `${PRIMARY_COLOR}10`,
+    backgroundColor: '#FFFFFF',
+  },
+  unreadBadge: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
   },
 });

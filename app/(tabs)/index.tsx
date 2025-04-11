@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image, ImageBackground } from 'react-native';
 import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
-const PRIMARY_COLOR = '#006D3B';
+const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
 
 const nearbyServices = [
@@ -161,8 +161,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>{title}</Text>
         </View>
         <TouchableOpacity onPress={onPress} style={styles.seeAllButton}>
-          <Text style={styles.seeAllText}>Все</Text>
-          <ChevronRight size={16} color={PRIMARY_COLOR} />
+          <ChevronRight size={20} color={PRIMARY_COLOR} />
         </TouchableOpacity>
       </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
@@ -192,23 +191,30 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.userInfo}>
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>АИ</Text>
-          </View>
-          <View style={styles.userTextContainer}>
-            <Text style={styles.greeting}>Добрый день,</Text>
-            <Text style={styles.userName}>Анна Иванова</Text>
+      <ImageBackground
+        source={require('../../assets/images/street.jpg')}
+        style={styles.headerBackground}
+      >
+        <View style={styles.headerOverlay}>
+          <View style={styles.header}>
+            <View style={styles.userInfo}>
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarText}>АИ</Text>
+              </View>
+              <View style={styles.userTextContainer}>
+                <Text style={[styles.greeting, { color: '#FFFFFF' }]}>Добрый день,</Text>
+                <Text style={[styles.userName, { color: '#FFFFFF' }]}>Анна Иванова</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.notificationButton}>
+              <Bell size={24} color="#FFFFFF" />
+              <View style={[styles.notificationBadge, { backgroundColor: '#FF3B30' }]}>
+                <Text style={styles.notificationText}>3</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
-        <TouchableOpacity style={styles.notificationButton}>
-          <Bell size={24} color={PRIMARY_COLOR} />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationText}>3</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+      </ImageBackground>
 
       {emergencies.length > 0 && (
         <View style={styles.emergenciesContainer}>
@@ -248,7 +254,7 @@ export default function HomeScreen() {
             style={styles.viewAllButton}
             onPress={() => router.push('/nearby')}>
             <Text style={styles.viewAllText}>Посмотреть</Text>
-            <ChevronRight size={20} color={PRIMARY_COLOR} />
+            <ChevronRight size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
         <ScrollView 
@@ -263,18 +269,13 @@ export default function HomeScreen() {
               style={styles.serviceCard}
               onPress={() => router.push('/nearby')}>
               <Image source={service.image} style={styles.serviceImage} />
-              <Text style={styles.serviceTitle}>{service.title}</Text>
-              <Text style={styles.serviceDistance}>{service.distance}</Text>
+              <View style={styles.serviceContent}>
+                <Text style={styles.serviceTitle}>{service.title}</Text>
+                <Text style={styles.serviceDistance}>{service.distance}</Text>
+              </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
-        {scrollPosition > 0 && (
-          <TouchableOpacity 
-            style={[styles.scrollButton, styles.scrollLeft]}
-            onPress={() => setScrollPosition(0)}>
-            <ChevronLeft size={24} color={PRIMARY_COLOR} />
-          </TouchableOpacity>
-        )}
       </View>
 
       <View style={styles.announcementsContainer}>
@@ -310,7 +311,7 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {renderSection('Объявления о продаже', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
+      {renderSection('Объявления', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
       {renderSection('Акции и скидки', promotions, <Percent size={20} color={PRIMARY_COLOR} />, () => {})}
     </ScrollView>
   );
@@ -321,14 +322,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+  headerBackground: {
+    width: '100%',
+    height: 260,
+  },
+  headerOverlay: {
+    backgroundColor: 'rgba(165, 39, 77, 0.59)',
+    height: '100%',
+    padding: 20,
+    justifyContent: 'flex-end',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
   },
   userInfo: {
     flexDirection: 'row',
@@ -338,7 +345,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: PRIMARY_COLOR,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -352,13 +359,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   greeting: {
-    fontSize: 14,
-    color: '#8E8E93',
+    fontSize: 18,
+    color: '#FFFFFF',
   },
   userName: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: '#FFFFFF',
   },
   notificationButton: {
     position: 'relative',
@@ -384,6 +391,7 @@ const styles = StyleSheet.create({
   servicesContainer: {
     padding: 20,
     position: 'relative',
+    backgroundColor: `${PRIMARY_COLOR}10`,
   },
   servicesHeader: {
     flexDirection: 'row',
@@ -394,16 +402,21 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: PRIMARY_COLOR,
+    marginBottom: 16,
   },
   viewAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: PRIMARY_COLOR,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 4,
   },
   viewAllText: {
     fontSize: 16,
-    color: PRIMARY_COLOR,
-    marginRight: 4,
+    color: '#FFFFFF',
   },
   servicesScroll: {
     flexGrow: 0,
@@ -411,21 +424,18 @@ const styles = StyleSheet.create({
   serviceCard: {
     width: width * 0.4,
     backgroundColor: '#FFFFFF',
-    padding: 16,
     borderRadius: 16,
     marginRight: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    overflow: 'hidden',
   },
   serviceImage: {
     width: '100%',
     height: 120,
     borderRadius: 12,
     marginBottom: 8,
+  },
+  serviceContent: {
+    padding: 12,
   },
   serviceTitle: {
     fontSize: 16,
@@ -448,7 +458,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -458,7 +468,8 @@ const styles = StyleSheet.create({
     left: 10,
   },
   announcementsContainer: {
-    padding: 20,
+    padding: 15,
+    marginTop: 10,
   },
   announcementCard: {
     flexDirection: 'row',
@@ -466,7 +477,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -522,7 +533,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -535,6 +546,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    backgroundColor: `${PRIMARY_COLOR}20`,
   },
   emergencyContent: {
     flex: 1,
@@ -556,6 +568,8 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
+    backgroundColor: `${PRIMARY_COLOR}05`,
+    paddingVertical: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -574,27 +588,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  seeAllText: {
-    fontSize: 14,
-    color: PRIMARY_COLOR,
-    fontWeight: '500',
-  },
   scrollView: {
     paddingLeft: 16,
   },
   card: {
     width: width * 0.7,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    backgroundColor: `${PRIMARY_COLOR}10`,
     marginRight: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    borderRadius: 12,
   },
   cardImage: {
     width: '100%',
@@ -603,12 +604,13 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 12,
   },
   cardContent: {
-    padding: 12,
+    padding: 16,
+    backgroundColor: 'transparent',
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: PRIMARY_COLOR,
     marginBottom: 4,
   },
   cardPrice: {
@@ -619,7 +621,7 @@ const styles = StyleSheet.create({
   },
   cardDetails: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#1A1A1A',
     marginBottom: 4,
   },
   cardAddress: {
@@ -659,5 +661,10 @@ const styles = StyleSheet.create({
   discountLabel: {
     fontSize: 12,
     color: '#FFFFFF',
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: PRIMARY_COLOR,
+    fontWeight: '500',
   },
 });

@@ -5,6 +5,8 @@ import { Camera, ChevronRight, Shield, AlertCircle, Video, Square } from 'lucide
 
 const { width } = Dimensions.get('window');
 
+const PRIMARY_COLOR = '#8B1E3F'; // бургунди цвет
+
 export default function CamerasScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedCamera, setSelectedCamera] = useState<number | null>(null);
@@ -14,21 +16,18 @@ export default function CamerasScreen() {
       id: 1, 
       url: 'http://91.210.87.140:8082/mjpg/video.mjpg', 
       title: 'Подъезд №1',
-      status: 'online',
       location: 'Вход в подъезд'
     },
     { 
       id: 2, 
       url: 'http://78.36.19.87/mjpg/video.mjpg', 
       title: 'Парковка',
-      status: 'offline',
       location: 'Внутренний двор'
     },
     { 
       id: 3, 
       url: 'http://91.210.87.140:8081/mjpg/video.mjpg', 
       title: 'Детская площадка',
-      status: 'online',
       location: 'Внутренний двор'
     },
   ]);
@@ -94,22 +93,12 @@ export default function CamerasScreen() {
     </html>
   `;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'online':
-        return '#34C759';
-      case 'offline':
-        return '#FF3B30';
-      default:
-        return '#8E8E93';
-    }
-  };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <Shield size={24} color="#007AFF" />
+          <Shield size={24} color="#FFFFFF" />
           <Text style={styles.headerTitle}>Система видеонаблюдения</Text>
         </View>
         <Text style={styles.headerSubtitle}>Всего камер: {cameras.length}</Text>
@@ -127,7 +116,6 @@ export default function CamerasScreen() {
           <View style={styles.cameraHeader}>
             <View style={styles.cameraTitleContainer}>
               <Text style={styles.cameraTitle}>{camera.title}</Text>
-              <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(camera.status) }]} />
             </View>
             <View style={styles.headerControls}>
               {selectedCamera === camera.id && (
@@ -207,34 +195,37 @@ export default function CamerasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
+    backgroundColor: PRIMARY_COLOR,
+    padding: 20,
+    paddingTop: 60,
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 18,
+    gap: 12,
+    justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: 8,
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#8E8E93',
+    color: '#FFFFFF',
+    opacity: 0.8,
+    textAlign: 'center',
   },
   cameraContainer: {
     backgroundColor: '#FFFFFF',
     margin: 16,
     borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -242,7 +233,7 @@ const styles = StyleSheet.create({
   },
   selectedCamera: {
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: PRIMARY_COLOR,
   },
   cameraHeader: {
     flexDirection: 'row',
@@ -262,14 +253,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cameraTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    marginRight: 8,
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    color: PRIMARY_COLOR,
+    marginBottom: 8,
   },
   chevron: {
     transform: [{ rotate: '0deg' }],

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image
 import { Store, Utensils, Dumbbell, Scissors, ChevronLeft, MapPin } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
-const PRIMARY_COLOR = '#006D3B';
+const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
 
 export default function NearbyScreen() {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     margin: 6,
-    shadowColor: '#000',
+    shadowColor: '#5a2a37',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
