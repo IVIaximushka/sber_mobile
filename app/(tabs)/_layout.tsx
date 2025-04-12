@@ -1,61 +1,57 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, CreditCard, MessageSquare, User, Camera } from 'lucide-react-native';
+import { Home, MessageCircle, Wrench, Camera, User } from 'lucide-react-native';
+
+const PRIMARY_COLOR = '#8B1E3F';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#8B1E3F',
+        tabBarActiveTintColor: PRIMARY_COLOR,
         tabBarInactiveTintColor: '#8E8E93',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
           borderTopColor: '#E5E5EA',
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          elevation: 0,
-          shadowOpacity: 0,
-        },
-        headerTitleStyle: {
-          fontWeight: '600',
-          fontSize: 18,
-        },
-        headerTitleAlign: 'center',
+        headerShown: false,
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Главная',
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Home size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="services"
         options={{
           title: 'Услуги',
-          tabBarIcon: ({ color, size }) => <CreditCard size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Wrench size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
           title: 'Чат',
-          tabBarIcon: ({ color, size }) => <MessageSquare size={size} color={color} />,
+          tabBarIcon: ({ color }) => <MessageCircle size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="cameras"
         options={{
           title: 'Камеры',
-          tabBarIcon: ({ color, size }) => <Camera size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Camera size={24} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Профиль',
-          tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+          tabBarIcon: ({ color }) => <User size={24} color={color} />,
         }}
       />
     </Tabs>

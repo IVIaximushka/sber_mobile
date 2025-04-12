@@ -79,22 +79,6 @@ const managementAnnouncements = [
   },
 ];
 
-const promotions = [
-  {
-    id: '1',
-    title: 'Скидка на парковку',
-    discount: '20%',
-    description: 'При оплате за 6 месяцев',
-    image: require('../../assets/images/parking.jpg'),
-  },
-  {
-    id: '2',
-    title: 'Бесплатный вывоз мусора',
-    discount: '100%',
-    description: 'При сдаче макулатуры',
-    image: require('../../assets/images/recycling.jpg'),
-  },
-];
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -206,7 +190,9 @@ export default function HomeScreen() {
                 <Text style={[styles.userName, { color: '#FFFFFF' }]}>Анна Иванова</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.notificationButton}>
+            <TouchableOpacity 
+              style={styles.notificationButton}
+              onPress={() => router.push('/notifications')}>
               <Bell size={24} color="#FFFFFF" />
               <View style={[styles.notificationBadge, { backgroundColor: '#FF3B30' }]}>
                 <Text style={styles.notificationText}>3</Text>
@@ -249,7 +235,7 @@ export default function HomeScreen() {
 
       <View style={styles.servicesContainer}>
         <View style={styles.servicesHeader}>
-          <Text style={styles.sectionTitle}>Рядом с домом</Text>
+          <Text style={styles.sectionTitle}>Акции и скидки</Text>
           <TouchableOpacity 
             style={styles.viewAllButton}
             onPress={() => router.push('/nearby')}>
@@ -312,7 +298,6 @@ export default function HomeScreen() {
       </View>
 
       {renderSection('Объявления', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
-      {renderSection('Акции и скидки', promotions, <Percent size={20} color={PRIMARY_COLOR} />, () => {})}
     </ScrollView>
   );
 }
@@ -324,10 +309,10 @@ const styles = StyleSheet.create({
   },
   headerBackground: {
     width: '100%',
-    height: 260,
+    height: 140,
   },
   headerOverlay: {
-    backgroundColor: 'rgba(165, 39, 77, 0.59)',
+    backgroundColor: 'rgba(107, 3, 34, 0.59)',
     height: '100%',
     padding: 20,
     justifyContent: 'flex-end',
