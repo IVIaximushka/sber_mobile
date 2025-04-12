@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
 
+const PRIMARY_COLOR = '#8B1E3F';
+
 export default function ProfileScreen() {
   const { state } = useAuth();
   const router = useRouter();
@@ -41,11 +43,11 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.avatarPlaceholder}>
+        <View style={styles.avatar}>
           <User size={40} color="#FFFFFF" />
         </View>
-        <Text style={styles.userName}>{userInfo.name}</Text>
-        <Text style={styles.userApartment}>Квартира {userInfo.apartment}</Text>
+        <Text style={styles.avatarText}>{userInfo.name}</Text>
+        <Text style={styles.userAddress}>Квартира {userInfo.apartment}</Text>
       </View>
 
       <View style={styles.section}>
@@ -60,19 +62,19 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <View style={styles.menuSection}>
         <Text style={styles.sectionTitle}>Настройки</Text>
         <TouchableOpacity style={styles.menuItem}>
-          <Home size={24} color="#007AFF" />
-          <Text style={styles.menuText}>Данные о квартире</Text>
+          <Home size={24} color={PRIMARY_COLOR} />
+          <Text style={styles.menuItemTitle}>Данные о квартире</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Bell size={24} color="#007AFF" />
-          <Text style={styles.menuText}>Уведомления</Text>
+          <Bell size={24} color={PRIMARY_COLOR} />
+          <Text style={styles.menuItemTitle}>Уведомления</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem}>
-          <Shield size={24} color="#007AFF" />
-          <Text style={styles.menuText}>Безопасность</Text>
+          <Shield size={24} color={PRIMARY_COLOR} />
+          <Text style={styles.menuItemTitle}>Безопасность</Text>
         </TouchableOpacity>
       </View>
 
@@ -93,43 +95,50 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     backgroundColor: '#FFFFFF',
-    padding: 24,
+    padding: 20,
+    paddingTop: 60,
     alignItems: 'center',
   },
-  avatarPlaceholder: {
+  avatar: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#007AFF',
+    backgroundColor: `${PRIMARY_COLOR}`,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
-  userName: {
+  avatarText: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 4,
+    fontWeight: '600',
+    color: PRIMARY_COLOR,
   },
-  userApartment: {
-    fontSize: 16,
-    color: '#8E8E93',
+  userAddress: {
+    fontSize: 18,
+    color: 'black',
+    opacity: 0.8,
   },
   section: {
     backgroundColor: '#FFFFFF',
-    padding: 16,
+    padding: 20,
     marginTop: 16,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontWeight: '600',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#1A1A1A',
   },
   infoItem: {
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5EA',
   },
   infoLabel: {
     fontSize: 14,
@@ -138,29 +147,42 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 16,
+    color: '#1A1A1A',
+  },
+  menuSection: {
+    backgroundColor: `${PRIMARY_COLOR}05`,
+    padding: 16,
+    marginTop: 16,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5EA',
-  },
-  menuText: {
-    fontSize: 16,
-    marginLeft: 12,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     padding: 16,
-    marginTop: 16,
-    marginBottom: 32,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#5a2a37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  menuItemTitle: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 12,
+    color: '#1A1A1A',
+  },
+  logoutButton: {
+    margin: 16,
+    backgroundColor: PRIMARY_COLOR,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
   },
   logoutText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    color: '#FF3B30',
-    marginLeft: 12,
+    fontWeight: '600',
   },
 });

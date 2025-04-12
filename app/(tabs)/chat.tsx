@@ -1,61 +1,96 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Send } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Search, MessageCircle, HelpCircle, Users } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
-export default function ChatScreen() {
-  const [message, setMessage] = useState('');
+const PRIMARY_COLOR = '#8B1E3F';
 
-  const messages = [
+export default function ChatScreen() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const chats = [
     {
-      id: 1,
-      sender: 'Анна Иванова',
-      text: 'Добрый день! Кто-нибудь знает хорошего мастера по ремонту стиральных машин?',
-      time: '10:30',
-      apartment: '42',
+      id: '1',
+      title: 'Помощник',
+      lastMessage: 'Чем я могу вам помочь сегодня?',
+      time: 'Сейчас',
+      unread: 0,
+      isAI: true,
+      icon: HelpCircle,
     },
     {
-      id: 2,
-      sender: 'Петр Сидоров',
-      text: 'Да, могу порекомендовать. Недавно вызывал мастера через приложение, очень качественно все сделал.',
-      time: '10:32',
-      apartment: '56',
+      id: '2',
+      title: 'Техническая поддержка',
+      lastMessage: 'Мы проверили ваш интернет, все в порядке',
+      time: '2 дня назад',
+      unread: 0,
+      icon: MessageCircle,
     },
     {
-      id: 3,
-      sender: 'Мария Петрова',
-      text: 'Присоединяюсь к рекомендации. Тоже пользовалась его услугами.',
-      time: '10:35',
-      apartment: '23',
+      id: '3',
+      title: 'Соседи',
+      lastMessage: 'Привет всем! Кто-нибудь знает, когда будет уборка подъезда?',
+      time: 'Вчера',
+      unread: 2,
+      icon: Users,
     },
   ];
 
+  const filteredChats = chats.filter(chat => 
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleChatPress = (chatId: string) => {
+    if (chatId === '1') {
+      router.push('/ai-assistant');
+    } else {
+      router.push(`/chat/${chatId}`);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Search size={20} color={PRIMARY_COLOR} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Поиск чатов"
+            placeholderTextColor="#8E8E93"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
       <ScrollView style={styles.messagesContainer}>
-        {messages.map((msg) => (
-          <View key={msg.id} style={styles.messageCard}>
-            <View style={styles.messageHeader}>
-              <Text style={styles.senderName}>{msg.sender}</Text>
-              <Text style={styles.apartmentNumber}>кв. {msg.apartment}</Text>
+        {filteredChats.map((chat) => (
+          <TouchableOpacity 
+            key={chat.id} 
+            style={styles.chatItem}
+            onPress={() => handleChatPress(chat.id)}
+          >
+            <View style={[styles.chatIconContainer, { backgroundColor: chat.isAI ? `${PRIMARY_COLOR}20` : PRIMARY_COLOR }]}>
+              <chat.icon size={24} color={chat.isAI ? PRIMARY_COLOR : '#FFFFFF'} />
             </View>
-            <Text style={styles.messageText}>{msg.text}</Text>
-            <Text style={styles.messageTime}>{msg.time}</Text>
-          </View>
+            <View style={styles.chatContent}>
+              <View style={styles.chatHeader}>
+                <Text style={styles.chatTitle}>{chat.title}</Text>
+                <Text style={styles.chatTime}>{chat.time}</Text>
+              </View>
+              <Text style={styles.chatMessage} numberOfLines={1}>
+                {chat.lastMessage}
+              </Text>
+            </View>
+            {chat.unread > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadText}>{chat.unread}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         ))}
       </ScrollView>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Написать сообщение..."
-          value={message}
-          onChangeText={setMessage}
-          multiline
-        />
-        <TouchableOpacity style={styles.sendButton}>
-          <Send size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -63,63 +98,83 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#FFFFFF',
+    paddingTop: 60,
+  },
+  searchContainer: {
+    backgroundColor: `${PRIMARY_COLOR}10`,
+    padding: 16,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#5a2a37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 8,
+    color: '#1A1A1A',
   },
   messagesContainer: {
     flex: 1,
-    padding: 16,
   },
-  messageCard: {
+  chatItem: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: `${PRIMARY_COLOR}10`,
     backgroundColor: '#FFFFFF',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
   },
-  messageHeader: {
+  chatIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  chatContent: {
+    flex: 1,
+  },
+  chatHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  senderName: {
+  chatTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#1A1A1A',
   },
-  apartmentNumber: {
+  chatTime: {
+    fontSize: 12,
+    color: '#8E8E93',
+  },
+  chatMessage: {
     fontSize: 14,
     color: '#8E8E93',
   },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-    marginBottom: 8,
-  },
-  messageTime: {
-    fontSize: 12,
-    color: '#8E8E93',
-    alignSelf: 'flex-end',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E5EA',
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    maxHeight: 100,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: '#007AFF',
-    borderRadius: 20,
+  unreadBadge: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  unreadText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
