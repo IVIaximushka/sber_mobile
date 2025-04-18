@@ -8,7 +8,9 @@ import {
   Alert, 
   ScrollView,
   ActivityIndicator,
-  Image
+  Image,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { useAuth } from '../../lib/authContext';
 import { useRouter } from 'expo-router';
@@ -18,12 +20,16 @@ interface ProfileData {
   id: string;
   username?: string;
   avatar_url?: string;
+  phone?: string;
+  apartment?: string;
   updated_at?: string;
 }
 
 export default function EditProfileScreen() {
   const { state, updateProfile, getProfile } = useAuth();
   const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
+  const [apartment, setApartment] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
@@ -34,6 +40,8 @@ export default function EditProfileScreen() {
         const profile = await getProfile();
         if (profile) {
           setUsername(profile.username || '');
+          setPhone(profile.phone || '');
+          setApartment(profile.apartment || '');
         }
       } catch (error) {
         Alert.alert('Ошибка', (error as Error).message);
@@ -50,6 +58,8 @@ export default function EditProfileScreen() {
     try {
       await updateProfile({
         username,
+        phone,
+        apartment
       });
       Alert.alert('Успех', 'Профиль успешно обновлен');
       router.back();
@@ -69,57 +79,81 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.title}>Редактировать профиль</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Редактировать профиль</Text>
 
-        <View style={styles.avatarContainer}>
-          <Image
-            source={
-              state.user?.user_metadata?.avatar_url
-                ? { uri: state.user.user_metadata.avatar_url }
-                : require('../../assets/images/icon.png')
-            }
-            style={styles.avatar}
+          <View style={styles.avatarContainer}>
+            <Image
+              source={
+                state.user?.user_metadata?.avatar_url
+                  ? { uri: state.user.user_metadata.avatar_url }
+                  : require('../../assets/images/icon.png')
+              }
+              style={styles.avatar}
+            />
+          </View>
+
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={state.user?.email || ''}
+            editable={false}
           />
-        </View>
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={state.user?.email || ''}
-          editable={false}
-        />
+          <Text style={styles.label}>Имя пользователя</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Введите имя пользователя"
+            value={username}
+            onChangeText={setUsername}
+          />
 
-        <Text style={styles.label}>Имя пользователя</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Введите имя пользователя"
-          value={username}
-          onChangeText={setUsername}
-        />
+          <Text style={styles.label}>Номер телефона</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Введите номер телефона"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+          />
 
-        <View style={styles.buttonContainer}>
-          <Link href="/(tabs)" asChild>
-            <TouchableOpacity style={[styles.button, styles.mainButton]}>
-              <Text style={styles.buttonText}>Перейти к приложению</Text>
+          <Text style={styles.label}>Номер квартиры</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Введите номер квартиры"
+            value={apartment}
+            onChangeText={setApartment}
+            keyboardType="number-pad"
+          />
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity 
+              style={[styles.button, styles.cancelButton]} 
+              onPress={() => router.back()}
+            >
+              <Text style={styles.buttonText}>Отмена</Text>
             </TouchableOpacity>
-          </Link>
 
-          <TouchableOpacity 
-            style={[styles.button, styles.saveButton]} 
-            onPress={handleSave}
-            disabled={saving}
-          >
-            {saving ? (
-              <ActivityIndicator color="#ffffff" />
-            ) : (
-              <Text style={styles.buttonText}>Сохранить изменения</Text>
-            )}
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.button, styles.saveButton]} 
+              onPress={handleSave}
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.buttonText}>Сохранить</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -167,26 +201,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonContainer: {
-    width: '100%',
-    maxWidth: 300,
-    gap: 16,
-    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
     marginTop: 20,
   },
   button: {
+    flex: 1,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
-    width: '100%',
+    justifyContent: 'center',
   },
-  mainButton: {
-    backgroundColor: '#2ecc71',
+  cancelButton: {
+    backgroundColor: '#95a5a6',
   },
   saveButton: {
     backgroundColor: '#3498db',
-  },
-  signOutButton: {
-    backgroundColor: '#e74c3c',
   },
   buttonText: {
     color: '#ffffff',

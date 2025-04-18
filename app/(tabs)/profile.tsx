@@ -1,22 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
-import { User, Chrome as Home, Bell, Shield, LogOut } from 'lucide-react-native';
+import { User, Chrome as Home, Bell, Shield, LogOut, Edit } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
+interface ProfileData {
+  username?: string;
+  phone?: string;
+  apartment?: string;
+}
+
 export default function ProfileScreen() {
-  const { state } = useAuth();
+  const { state, getProfile } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileData>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const profile = await getProfile();
+        if (profile) {
+          setProfileData({
+            username: profile.username,
+            phone: profile.phone,
+            apartment: profile.apartment
+          });
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке профиля:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, [getProfile]);
 
   // Используем данные профиля из Supabase, если они доступны
   const userInfo = {
-    name: state.user?.user_metadata?.username || 'Пользователь',
-    apartment: '42',
-    phone: '+7 (999) 123-45-67',
+    name: profileData.username || state.user?.user_metadata?.username || 'Пользователь',
+    apartment: profileData.apartment || '—',
+    phone: profileData.phone || '—',
     email: state.user?.email || 'Нет данных',
   };
 
@@ -40,6 +69,14 @@ export default function ProfileScreen() {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={PRIMARY_COLOR} />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -48,6 +85,14 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.avatarText}>{userInfo.name}</Text>
         <Text style={styles.userAddress}>Квартира {userInfo.apartment}</Text>
+        
+        <TouchableOpacity 
+          style={styles.editButton} 
+          onPress={() => router.push('/profile/edit')}
+        >
+          <Edit size={16} color="#FFFFFF" />
+          <Text style={styles.editButtonText}>Редактировать</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
@@ -184,5 +229,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  editButton: {
+    flexDirection: 'row',
+    backgroundColor: PRIMARY_COLOR,
+    padding: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginTop: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
