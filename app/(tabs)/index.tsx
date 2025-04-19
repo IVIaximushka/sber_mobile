@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image, ImageBackground } from 'react-native';
-import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image, ImageBackground, Modal, ViewStyle, TextStyle, ImageStyle } from 'react-native';
+import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent, ThumbsUp, ThumbsDown, Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
@@ -41,48 +41,186 @@ const nearbyServices = [
   },
 ];
 
-const realEstateListings = [
+const residentProposals = [
   {
     id: '1',
-    title: '2-комнатная квартира',
-    price: '12 500 000 ₽',
-    area: '65 м²',
-    floor: '5/9 этаж',
-    address: 'ул. Ленина, 10',
-    image: require('../../assets/images/apartment1.jpg'),
+    title: 'Ремонт детской площадки',
+    description: 'Предлагаю обновить детскую площадку: установить новые качели, горки и песочницу. Сейчас оборудование устарело и требует замены.',
+    author: 'Анна Петрова',
+    date: '15.03.2024',
+    votesFor: 45,
+    votesAgainst: 12,
+    status: 'active',
+    image: require('../../assets/images/playground.jpg'),
   },
   {
     id: '2',
-    title: '1-комнатная квартира',
-    price: '8 900 000 ₽',
-    area: '35 м²',
-    floor: '3/9 этаж',
-    address: 'ул. Ленина, 10',
-    image: require('../../assets/images/apartment2.jpg'),
-  },
-];
-
-const managementAnnouncements = [
-  {
-    id: '1',
-    title: 'Ремонт лифта',
-    date: '15 марта',
-    description: 'Плановый ремонт лифта №2',
-    image: require('../../assets/images/elevator.jpg'),
+    title: 'Установка велопарковки',
+    description: 'Нужно оборудовать специальную парковку для велосипедов у входа в дом. Сейчас велосипеды привязывают к деревьям и фонарям.',
+    author: 'Михаил Иванов',
+    date: '14.03.2024',
+    votesFor: 38,
+    votesAgainst: 15,
+    status: 'active',
+    image: require('../../assets/images/bike.jpg'),
   },
   {
-    id: '2',
-    title: 'Уборка территории',
-    date: '20 марта',
-    description: 'Генеральная уборка придомовой территории',
+    id: '3',
+    title: 'Организация субботника',
+    description: 'Предлагаю организовать субботник для уборки территории вокруг дома в следующую субботу. Нужны волонтеры для участия.',
+    author: 'Елена Сидорова',
+    date: '13.03.2024',
+    votesFor: 52,
+    votesAgainst: 8,
+    status: 'active',
     image: require('../../assets/images/cleaning.jpg'),
   },
 ];
 
+const fundraisingCampaigns = [
+  {
+    id: '1',
+    title: 'Ремонт домофона',
+    description: 'Сбор средств на ремонт и модернизацию системы домофона',
+    targetAmount: 50000,
+    currentAmount: 35000,
+    image: require('../../assets/images/intercom.jpg'),
+  },
+  {
+    id: '2',
+    title: 'Установка видеокамер',
+    description: 'Сбор средств на установку системы видеонаблюдения в подъезде',
+    targetAmount: 100000,
+    currentAmount: 45000,
+    image: require('../../assets/images/camera.jpg'),
+  },
+  {
+    id: '3',
+    title: 'Благоустройство территории',
+    description: 'Сбор средств на установку новых скамеек и урн во дворе',
+    targetAmount: 75000,
+    currentAmount: 60000,
+    image: require('../../assets/images/yard.jpg'),
+  },
+];
+
+type Styles = {
+  container: ViewStyle;
+  headerBackground: ViewStyle;
+  headerOverlay: ViewStyle;
+  header: ViewStyle;
+  userInfo: ViewStyle;
+  avatarPlaceholder: ViewStyle;
+  avatarText: TextStyle;
+  userTextContainer: ViewStyle;
+  greeting: TextStyle;
+  userName: TextStyle;
+  notificationButton: ViewStyle;
+  notificationBadge: ViewStyle;
+  notificationText: TextStyle;
+  servicesContainer: ViewStyle;
+  servicesHeader: ViewStyle;
+  sectionTitle: TextStyle;
+  viewAllButton: ViewStyle;
+  viewAllText: TextStyle;
+  servicesScroll: ViewStyle;
+  serviceCard: ViewStyle;
+  serviceImage: ImageStyle;
+  serviceContent: ViewStyle;
+  serviceTitle: TextStyle;
+  serviceDistance: TextStyle;
+  scrollButton: ViewStyle;
+  scrollLeft: ViewStyle;
+  detailItem: ViewStyle;
+  detailText: TextStyle;
+  emergenciesContainer: ViewStyle;
+  emergenciesHeader: ViewStyle;
+  emergenciesTitle: TextStyle;
+  emergencyCard: ViewStyle;
+  emergencyIconContainer: ViewStyle;
+  emergencyContent: ViewStyle;
+  emergencyTitle: TextStyle;
+  emergencyDescription: TextStyle;
+  emergencyDetails: ViewStyle;
+  section: ViewStyle;
+  sectionHeader: ViewStyle;
+  sectionTitleContainer: ViewStyle;
+  seeAllButton: ViewStyle;
+  scrollView: ViewStyle;
+  card: ViewStyle;
+  cardImage: ImageStyle;
+  cardContent: ViewStyle;
+  cardTitle: TextStyle;
+  cardPrice: TextStyle;
+  cardDetails: TextStyle;
+  cardAddress: TextStyle;
+  cardDate: TextStyle;
+  cardDescription: TextStyle;
+  cardDistance: TextStyle;
+  discountContainer: ViewStyle;
+  discountText: TextStyle;
+  discountLabel: TextStyle;
+  proposalsContainer: ViewStyle;
+  proposalsScroll: ViewStyle;
+  proposalCard: ViewStyle;
+  proposalImage: ImageStyle;
+  proposalContent: ViewStyle;
+  proposalTitle: TextStyle;
+  proposalDescription: TextStyle;
+  proposalDetails: ViewStyle;
+  votingContainer: ViewStyle;
+  voteCounts: ViewStyle;
+  voteCountText: TextStyle;
+  voteButtons: ViewStyle;
+  voteButton: ViewStyle;
+  voteForButton: ViewStyle;
+  voteAgainstButton: ViewStyle;
+  votedForButton: ViewStyle;
+  votedAgainstButton: ViewStyle;
+  modalOverlay: ViewStyle;
+  modalContent: ViewStyle;
+  modalImage: ImageStyle;
+  modalHeader: ViewStyle;
+  modalTitle: TextStyle;
+  closeButton: ViewStyle;
+  closeButtonText: TextStyle;
+  modalScroll: ViewStyle;
+  modalInfo: ViewStyle;
+  modalDetailItem: ViewStyle;
+  modalDetailText: TextStyle;
+  modalDescription: TextStyle;
+  modalVoting: ViewStyle;
+  modalVotingTitle: TextStyle;
+  modalVoteCounts: ViewStyle;
+  modalVoteCount: TextStyle;
+  modalVoteButtons: ViewStyle;
+  modalVoteButton: ViewStyle;
+  modalVoteButtonText: TextStyle;
+  modalVoteButtonTextActive: TextStyle;
+  donationsContainer: ViewStyle;
+  donationsScroll: ViewStyle;
+  donationCard: ViewStyle;
+  donationImage: ImageStyle;
+  donationContent: ViewStyle;
+  donationTitle: TextStyle;
+  donationDescription: TextStyle;
+  progressContainer: ViewStyle;
+  progressBar: ViewStyle;
+  progressFill: ViewStyle;
+  progressText: TextStyle;
+  amountContainer: ViewStyle;
+  currentAmount: TextStyle;
+  targetAmount: TextStyle;
+  donateButton: ViewStyle;
+  donateButtonText: TextStyle;
+  divider: ViewStyle;
+};
 
 export default function HomeScreen() {
   const router = useRouter();
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
+  const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
 
   const emergencies = [
     {
@@ -105,37 +243,16 @@ export default function HomeScreen() {
       icon: Zap,
       color: '#FFF3E5',
     },
-  ];
-
-  const announcements = [
-    {
-      id: 1,
-      title: 'Собрание жильцов',
-      date: '25 марта',
-      time: '19:00',
-      location: 'Клубная гостиная',
-      participants: 12,
-      image: require('../../assets/images/meeting.jpg'),
-    },
-    {
-      id: 2,
-      title: 'Ремонт лифта',
-      date: '26 марта',
-      time: '10:00 - 18:00',
-      location: 'Лифт №2',
-      participants: 0,
-      image: require('../../assets/images/elevator.jpg'),
-    },
     {
       id: 3,
-      title: 'Уборка территории',
-      date: '27 марта',
-      time: '09:00',
-      location: 'Придомовая территория',
-      participants: 5,
-      image: require('../../assets/images/cleaning.jpg'),
+      title: 'Неоплаченные счета',
+      description: 'У вас есть неоплаченные счета за коммунальные услуги',
+      type: 'payment',
+      icon: Percent,
+      color: '#FFE5E5',
     },
   ];
+
 
   const renderSection = (title: string, items: any[], icon: any, onPress: () => void) => (
     <View style={styles.section}>
@@ -173,6 +290,21 @@ export default function HomeScreen() {
     </View>
   );
 
+  const handleVote = (proposalId: string, vote: 'for' | 'against') => {
+    setProposalVotes(prev => ({
+      ...prev,
+      [proposalId]: vote
+    }));
+  };
+
+  const handleProposalPress = (proposal: typeof residentProposals[0]) => {
+    setSelectedProposal(proposal);
+  };
+
+  const closeModal = () => {
+    setSelectedProposal(null);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <ImageBackground
@@ -206,7 +338,7 @@ export default function HomeScreen() {
         <View style={styles.emergenciesContainer}>
           <View style={styles.emergenciesHeader}>
             <AlertTriangle size={24} color="#FF3B30" />
-            <Text style={styles.emergenciesTitle}>Чрезвычайные ситуации</Text>
+            <Text style={styles.emergenciesTitle}>Важные события</Text>
           </View>
           {emergencies.map((emergency) => (
             <TouchableOpacity key={emergency.id} style={styles.emergencyCard}>
@@ -232,6 +364,7 @@ export default function HomeScreen() {
           ))}
         </View>
       )}
+      <View style={styles.divider} />
 
       <View style={styles.servicesContainer}>
         <View style={styles.servicesHeader}>
@@ -263,46 +396,206 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
+      <View style={styles.divider} />
 
-      <View style={styles.announcementsContainer}>
-        <Text style={styles.sectionTitle}>Объявления УК</Text>
-        {announcements.map((announcement) => (
-          <TouchableOpacity key={announcement.id} style={styles.announcementCard}>
-            <Image source={announcement.image} style={styles.announcementImage} />
-            <View style={styles.announcementContent}>
-              <Text style={styles.announcementTitle}>{announcement.title}</Text>
-              <View style={styles.announcementDetails}>
-                <View style={styles.detailItem}>
-                  <Calendar size={16} color="#8E8E93" />
-                  <Text style={styles.detailText}>{announcement.date}</Text>
+      <View style={styles.donationsContainer}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleContainer}>
+            <Heart size={20} color={PRIMARY_COLOR} />
+            <Text style={styles.sectionTitle}>Сборы и пожертвования</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.seeAllButton}>
+            <ChevronRight size={20} color={PRIMARY_COLOR} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.donationsScroll}>
+          {fundraisingCampaigns.map((campaign) => {
+            const progress = (campaign.currentAmount / campaign.targetAmount) * 100;
+            return (
+              <TouchableOpacity 
+                key={campaign.id} 
+                style={styles.donationCard}>
+                <Image source={campaign.image} style={styles.donationImage} />
+                <View style={styles.donationContent}>
+                  <Text style={styles.donationTitle}>{campaign.title}</Text>
+                  <Text style={styles.donationDescription} numberOfLines={2}>
+                    {campaign.description}
+                  </Text>
+                  <View style={styles.progressContainer}>
+                    <View style={styles.progressBar}>
+                      <View style={[styles.progressFill, { width: `${progress}%` }]} />
+                    </View>
+                    <Text style={styles.progressText}>{Math.round(progress)}%</Text>
+                  </View>
+                  <View style={styles.amountContainer}>
+                    <Text style={styles.currentAmount}>
+                      {campaign.currentAmount.toLocaleString()} ₽
+                    </Text>
+                    <Text style={styles.targetAmount}>
+                      из {campaign.targetAmount.toLocaleString()} ₽
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={styles.donateButton}>
+                    <Text style={styles.donateButtonText}>Пожертвовать</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.detailItem}>
-                  <Clock size={16} color="#8E8E93" />
-                  <Text style={styles.detailText}>{announcement.time}</Text>
-                </View>
-                <View style={styles.detailItem}>
-                  <MapPin size={16} color="#8E8E93" />
-                  <Text style={styles.detailText}>{announcement.location}</Text>
-                </View>
-                {announcement.participants > 0 && (
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+      <View style={styles.divider} />
+
+      <View style={styles.proposalsContainer}>
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleContainer}>
+            <Users size={20} color={PRIMARY_COLOR} />
+            <Text style={styles.sectionTitle}>Предложения жильцов</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.seeAllButton}
+            onPress={() => router.push('/proposals')}>
+            <ChevronRight size={20} color={PRIMARY_COLOR} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.proposalsScroll}>
+          {residentProposals.map((proposal) => (
+            <TouchableOpacity 
+              key={proposal.id} 
+              style={styles.proposalCard}
+              onPress={() => handleProposalPress(proposal)}>
+              <Image source={proposal.image} style={styles.proposalImage} />
+              <View style={styles.proposalContent}>
+                <Text style={styles.proposalTitle}>{proposal.title}</Text>
+                <Text style={styles.proposalDescription} numberOfLines={2}>{proposal.description}</Text>
+                <View style={styles.proposalDetails}>
                   <View style={styles.detailItem}>
                     <Users size={16} color="#8E8E93" />
-                    <Text style={styles.detailText}>{announcement.participants} участников</Text>
+                    <Text style={styles.detailText}>{proposal.author}</Text>
                   </View>
-                )}
+                  <View style={styles.detailItem}>
+                    <Calendar size={16} color="#8E8E93" />
+                    <Text style={styles.detailText}>{proposal.date}</Text>
+                  </View>
+                </View>
+                <View style={styles.votingContainer}>
+                  <View style={styles.voteCounts}>
+                    <Text style={styles.voteCountText}>За: {proposal.votesFor}</Text>
+                    <Text style={styles.voteCountText}>Против: {proposal.votesAgainst}</Text>
+                  </View>
+                  <View style={styles.voteButtons}>
+                    <TouchableOpacity 
+                      style={[
+                        styles.voteButton, 
+                        styles.voteForButton,
+                        proposalVotes[proposal.id] === 'for' && styles.votedForButton
+                      ]}
+                      onPress={() => handleVote(proposal.id, 'for')}>
+                      <ThumbsUp size={18} color={proposalVotes[proposal.id] === 'for' ? '#FFFFFF' : PRIMARY_COLOR} />
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[
+                        styles.voteButton, 
+                        styles.voteAgainstButton,
+                        proposalVotes[proposal.id] === 'against' && styles.votedAgainstButton
+                      ]}
+                      onPress={() => handleVote(proposal.id, 'against')}>
+                      <ThumbsDown size={18} color={proposalVotes[proposal.id] === 'against' ? '#FFFFFF' : PRIMARY_COLOR} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-            </View>
-            <ChevronRight size={24} color="#8E8E93" />
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
-      {renderSection('Объявления', realEstateListings, <Home size={20} color={PRIMARY_COLOR} />, () => {})}
+      <Modal
+        visible={selectedProposal !== null}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {selectedProposal && (
+              <>
+                <Image source={selectedProposal.image} style={styles.modalImage} />
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{selectedProposal.title}</Text>
+                  <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                    <Text style={styles.closeButtonText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.modalScroll}>
+                  <View style={styles.modalInfo}>
+                    <View style={styles.modalDetailItem}>
+                      <Users size={16} color="#8E8E93" />
+                      <Text style={styles.modalDetailText}>Автор: {selectedProposal.author}</Text>
+                    </View>
+                    <View style={styles.modalDetailItem}>
+                      <Calendar size={16} color="#8E8E93" />
+                      <Text style={styles.modalDetailText}>Дата: {selectedProposal.date}</Text>
+                    </View>
+                    <View style={styles.modalDetailItem}>
+                      <Text style={styles.modalDetailText}>Статус: {selectedProposal.status === 'active' ? 'Активно' : 'Завершено'}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.modalDescription}>{selectedProposal.description}</Text>
+                  <View style={styles.modalVoting}>
+                    <Text style={styles.modalVotingTitle}>Голосование</Text>
+                    <View style={styles.modalVoteCounts}>
+                      <Text style={styles.modalVoteCount}>За: {selectedProposal.votesFor}</Text>
+                      <Text style={styles.modalVoteCount}>Против: {selectedProposal.votesAgainst}</Text>
+                    </View>
+                    <View style={styles.modalVoteButtons}>
+                      <TouchableOpacity 
+                        style={[
+                          styles.modalVoteButton,
+                          styles.voteForButton,
+                          proposalVotes[selectedProposal.id] === 'for' && styles.votedForButton
+                        ]}
+                        onPress={() => handleVote(selectedProposal.id, 'for')}>
+                        <ThumbsUp size={20} color={proposalVotes[selectedProposal.id] === 'for' ? '#FFFFFF' : PRIMARY_COLOR} />
+                        <Text style={[
+                          styles.modalVoteButtonText,
+                          proposalVotes[selectedProposal.id] === 'for' && styles.modalVoteButtonTextActive
+                        ]}>Поддержать</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={[
+                          styles.modalVoteButton,
+                          styles.voteAgainstButton,
+                          proposalVotes[selectedProposal.id] === 'against' && styles.votedAgainstButton
+                        ]}
+                        onPress={() => handleVote(selectedProposal.id, 'against')}>
+                        <ThumbsDown size={20} color={proposalVotes[selectedProposal.id] === 'against' ? '#FFFFFF' : PRIMARY_COLOR} />
+                        <Text style={[
+                          styles.modalVoteButtonText,
+                          proposalVotes[selectedProposal.id] === 'against' && styles.modalVoteButtonTextActive
+                        ]}>Отклонить</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </ScrollView>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -376,7 +669,7 @@ const styles = StyleSheet.create({
   servicesContainer: {
     padding: 20,
     position: 'relative',
-    backgroundColor: `${PRIMARY_COLOR}10`,
+    backgroundColor: 'rgba(255, 200, 200, 0.36)',
   },
   servicesHeader: {
     flexDirection: 'row',
@@ -412,6 +705,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginRight: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
   },
   serviceImage: {
     width: '100%',
@@ -452,41 +747,6 @@ const styles = StyleSheet.create({
   scrollLeft: {
     left: 10,
   },
-  announcementsContainer: {
-    padding: 15,
-    marginTop: 10,
-  },
-  announcementCard: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginBottom: 16,
-    overflow: 'hidden',
-    shadowColor: '#5a2a37',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  announcementImage: {
-    width: 100,
-    height: 100,
-    borderTopLeftRadius: 16,
-    borderBottomLeftRadius: 16,
-  },
-  announcementContent: {
-    flex: 1,
-    padding: 16,
-  },
-  announcementTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#1A1A1A',
-  },
-  announcementDetails: {
-    gap: 8,
-  },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -513,16 +773,18 @@ const styles = StyleSheet.create({
   },
   emergencyCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'pink',
     borderRadius: 16,
     marginBottom: 12,
     padding: 16,
     alignItems: 'center',
-    shadowColor: '#5a2a37',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowColor: PRIMARY_COLOR,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'red',
   },
   emergencyIconContainer: {
     width: 48,
@@ -553,15 +815,15 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: 16,
-    backgroundColor: `${PRIMARY_COLOR}05`,
+    backgroundColor: 'rgba(255, 200, 200, 0.7)',
     paddingVertical: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingHorizontal: 5,
+    marginBottom: 0,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
@@ -578,7 +840,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: width * 0.7,
-    backgroundColor: `${PRIMARY_COLOR}10`,
+    backgroundColor: '#FFFFFF',
     marginRight: 16,
     borderRadius: 12,
   },
@@ -647,9 +909,283 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#FFFFFF',
   },
-  seeAllText: {
+  proposalsContainer: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  proposalsScroll: {
+    marginTop: 16,
+  },
+  proposalCard: {
+    width: width * 0.8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginRight: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
+  },
+  proposalImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+  },
+  proposalContent: {
+    padding: 16,
+  },
+  proposalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  proposalDescription: {
     fontSize: 14,
+    color: '#666666',
+    marginBottom: 12,
+  },
+  proposalDetails: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  votingContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    paddingTop: 12,
+  },
+  voteCounts: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  voteCountText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  voteButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  voteButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  voteForButton: {
+    borderColor: PRIMARY_COLOR,
+    backgroundColor: 'rgba(139, 30, 63, 0.1)',
+  },
+  voteAgainstButton: {
+    borderColor: PRIMARY_COLOR,
+    backgroundColor: 'rgba(139, 30, 63, 0.1)',
+  },
+  votedForButton: {
+    backgroundColor: PRIMARY_COLOR,
+  },
+  votedAgainstButton: {
+    backgroundColor: PRIMARY_COLOR,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  modalImage: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000000',
+    flex: 1,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: '#8E8E93',
+  },
+  modalScroll: {
+    padding: 16,
+  },
+  modalInfo: {
+    marginBottom: 16,
+  },
+  modalDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  modalDetailText: {
+    fontSize: 14,
+    color: '#666666',
+    marginLeft: 8,
+  },
+  modalDescription: {
+    fontSize: 16,
+    color: '#000000',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  modalVoting: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    padding: 16,
+  },
+  modalVotingTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 12,
+  },
+  modalVoteCounts: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  modalVoteCount: {
+    fontSize: 16,
+    color: '#666666',
+  },
+  modalVoteButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalVoteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  modalVoteButtonText: {
+    fontSize: 16,
     color: PRIMARY_COLOR,
     fontWeight: '500',
+  },
+  modalVoteButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  donationsContainer: {
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  donationsScroll: {
+    marginTop: 16,
+  },
+  donationCard: {
+    width: width * 0.8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginRight: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: PRIMARY_COLOR,
+  },
+  donationImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+  },
+  donationContent: {
+    padding: 16,
+  },
+  donationTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  donationDescription: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 12,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#E5E5EA',
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: PRIMARY_COLOR,
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 12,
+  },
+  currentAmount: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: PRIMARY_COLOR,
+    marginRight: 4,
+  },
+  targetAmount: {
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  donateButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  donateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  divider: {
+    height: 2,
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
   },
 });

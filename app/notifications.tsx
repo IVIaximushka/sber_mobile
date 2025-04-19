@@ -10,15 +10,6 @@ export default function NotificationsScreen() {
   const notifications = [
     {
       id: '1',
-      title: 'Неоплаченные счета',
-      description: 'У вас есть неоплаченные счета за коммунальные услуги',
-      date: 'Сегодня',
-      type: 'payment',
-      icon: Droplet,
-      color: '#FF3B30',
-    },
-    {
-      id: '2',
       title: 'Проверка счетчиков',
       description: 'Завтра с 9:00 до 18:00 будет проводиться проверка счетчиков',
       date: 'Вчера',
@@ -27,16 +18,7 @@ export default function NotificationsScreen() {
       color: PRIMARY_COLOR,
     },
     {
-      id: '3',
-      title: 'Обновление системы безопасности',
-      description: 'В вашем доме будет обновлена система видеонаблюдения',
-      date: '2 дня назад',
-      type: 'security',
-      icon: Shield,
-      color: PRIMARY_COLOR,
-    },
-    {
-      id: '4',
+      id: '2',
       title: 'Собрание жильцов',
       description: 'Напоминание о собрании жильцов завтра в 19:00',
       date: '3 дня назад',
@@ -91,7 +73,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -101,7 +83,7 @@ const styles = StyleSheet.create({
   },
   notificationCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#ffffe0',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -110,6 +92,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: '#FFD700',
   },
   iconContainer: {
     width: 48,

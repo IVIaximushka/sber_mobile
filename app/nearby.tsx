@@ -2,8 +2,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Image } fr
 import { ChevronLeft, MapPin, QrCode } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const PRIMARY_COLOR = '#8B1E3F';
+const GRADIENT_COLORS = ['#FFB8B8', '#FF9E9E', '#FFD1D1', '#FFE8E8'] as const;
 
 interface Place {
   id: string;
@@ -113,7 +115,9 @@ export default function NearbyScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={GRADIENT_COLORS}
+      style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -174,14 +178,13 @@ export default function NearbyScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
   },
   header: {
     backgroundColor: PRIMARY_COLOR,
