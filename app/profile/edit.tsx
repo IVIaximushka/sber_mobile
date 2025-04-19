@@ -62,7 +62,7 @@ export default function EditProfileScreen() {
         apartment
       });
       Alert.alert('Успех', 'Профиль успешно обновлен');
-      router.back();
+      router.replace('/(tabs)/profile');
     } catch (error) {
       Alert.alert('Ошибка', (error as Error).message);
     } finally {
