@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush, ArrowLeft } from 'lucide-react-native';
+import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush, ArrowLeft, Clock, DollarSign, Award } from 'lucide-react-native';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
@@ -57,10 +57,70 @@ export default function ServicesScreen() {
   ];
 
   const additionalServices = [
-    { id: 'plumber', icon: Wrench, title: 'Сантехник', description: 'Ремонт и замена сантехники', fullDescription: 'Профессиональные сантехнические услуги: устранение протечек, замена и установка сантехнического оборудования, прочистка канализации, монтаж систем отопления и водоснабжения. Работаем с любыми видами сантехники и предлагаем гарантию на все виды работ.' },
-    { id: 'electrician', icon: Zap, title: 'Электрик', description: 'Решение проблем с электричеством', fullDescription: 'Квалифицированные услуги электрика: диагностика и ремонт электропроводки, установка розеток и выключателей, замена электрощитов, монтаж светильников, устранение коротких замыканий. Гарантируем безопасность и соблюдение всех норм при выполнении электромонтажных работ.' },
-    { id: 'cleaning', icon: Brush, title: 'Уборка', description: 'Профессиональная уборка помещений', fullDescription: 'Комплексные услуги по уборке помещений: регулярная и генеральная уборка, мытье окон и витражей, химчистка мебели и ковров, уборка после ремонта. Используем профессиональное оборудование и экологичные моющие средства для достижения идеальной чистоты.' },
-    { id: 'handyman', icon: Wrench, title: 'Муж на час', description: 'Мелкий бытовой ремонт', fullDescription: 'Услуги "муж на час" для решения любых бытовых проблем: сборка и ремонт мебели, установка карнизов и полок, навеска телевизоров, замена замков, мелкий ремонт. Оперативный выезд мастера и выполнение работ любой сложности в удобное для вас время.' },
+    { 
+      id: 'plumber', 
+      icon: Wrench, 
+      title: 'Сантехник', 
+      description: 'Ремонт и замена сантехники', 
+      fullDescription: 'Профессиональные сантехнические услуги: устранение протечек, замена и установка сантехнического оборудования, прочистка канализации, монтаж систем отопления и водоснабжения. Работаем с любыми видами сантехники и предлагаем гарантию на все виды работ.',
+      price: 'от 1,500 ₽',
+      timeframe: '1-3 часа',
+      warranty: '1 год на все работы',
+      advantages: [
+        'Оперативный выезд',
+        'Профессиональное оборудование',
+        'Опыт более 10 лет',
+        'Фиксированная цена после осмотра'
+      ]
+    },
+    { 
+      id: 'electrician', 
+      icon: Zap, 
+      title: 'Электрик', 
+      description: 'Решение проблем с электричеством', 
+      fullDescription: 'Квалифицированные услуги электрика: диагностика и ремонт электропроводки, установка розеток и выключателей, замена электрощитов, монтаж светильников, устранение коротких замыканий. Гарантируем безопасность и соблюдение всех норм при выполнении электромонтажных работ.',
+      price: 'от 1,200 ₽',
+      timeframe: '1-5 часов',
+      warranty: '2 года на все работы',
+      advantages: [
+        'Сертифицированные мастера',
+        'Работаем с любой сложностью',
+        'Соблюдение всех норм ПУЭ',
+        'Экстренный выезд 24/7'
+      ]
+    },
+    { 
+      id: 'cleaning', 
+      icon: Brush, 
+      title: 'Уборка', 
+      description: 'Профессиональная уборка помещений', 
+      fullDescription: 'Комплексные услуги по уборке помещений: регулярная и генеральная уборка, мытье окон и витражей, химчистка мебели и ковров, уборка после ремонта. Используем профессиональное оборудование и экологичные моющие средства для достижения идеальной чистоты.',
+      price: 'от 2,000 ₽',
+      timeframe: '2-6 часов',
+      warranty: 'Гарантия качества',
+      advantages: [
+        'Экологичные средства',
+        'Обученный персонал',
+        'Работаем в выходные дни',
+        'Скидки на регулярную уборку'
+      ]
+    },
+    { 
+      id: 'handyman', 
+      icon: Wrench, 
+      title: 'Муж на час', 
+      description: 'Мелкий бытовой ремонт', 
+      fullDescription: 'Услуги "муж на час" для решения любых бытовых проблем: сборка и ремонт мебели, установка карнизов и полок, навеска телевизоров, замена замков, мелкий ремонт. Оперативный выезд мастера и выполнение работ любой сложности в удобное для вас время.',
+      price: 'от 1,000 ₽/час',
+      timeframe: '1-4 часа',
+      warranty: '6 месяцев',
+      advantages: [
+        'Универсальные мастера',
+        'Свой инструмент',
+        'Выезд в день обращения',
+        'Работы любой сложности'
+      ]
+    },
   ];
   
   const filteredServices = searchQuery.length > 0
@@ -80,10 +140,13 @@ export default function ServicesScreen() {
         <View style={styles.content}>
           <TouchableOpacity 
             style={styles.backButton} 
-            onPress={() => setSelectedAdditionalService(null)}
+            onPress={() => {
+              setSelectedAdditionalService(null);
+              setIsSearchActive(true);
+            }}
           >
             <ChevronRight size={24} color={PRIMARY_COLOR} style={{ transform: [{ rotate: '180deg' }] }} />
-            <Text style={styles.backButtonText}>Назад</Text>
+            <Text style={styles.backButtonText}>Назад к поиску</Text>
           </TouchableOpacity>
           
           <View style={styles.serviceDetailHeader}>
@@ -95,6 +158,42 @@ export default function ServicesScreen() {
           
           <View style={styles.section}>
             <Text style={styles.serviceFullDescription}>{service.fullDescription}</Text>
+            
+            <View style={styles.serviceInfoContainer}>
+              <View style={styles.serviceInfoItem}>
+                <DollarSign size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Стоимость</Text>
+                  <Text style={styles.serviceInfoValue}>{service.price}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.serviceInfoItem}>
+                <Clock size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Сроки выполнения</Text>
+                  <Text style={styles.serviceInfoValue}>{service.timeframe}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.serviceInfoItem}>
+                <Award size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Гарантия</Text>
+                  <Text style={styles.serviceInfoValue}>{service.warranty}</Text>
+                </View>
+              </View>
+            </View>
+            
+            <Text style={styles.advantagesTitle}>Преимущества</Text>
+            <View style={styles.advantagesList}>
+              {service.advantages.map((advantage, index) => (
+                <View key={index} style={styles.advantageItem}>
+                  <View style={styles.advantageDot} />
+                  <Text style={styles.advantageText}>{advantage}</Text>
+                </View>
+              ))}
+            </View>
             
             <TouchableOpacity style={styles.fullWidthButton}>
               <Text style={styles.fullWidthButtonText}>Заказать</Text>
@@ -187,6 +286,16 @@ export default function ServicesScreen() {
                 <View style={styles.serviceInfo}>
                   <Text style={styles.serviceTitle}>{item.title}</Text>
                   <Text style={styles.serviceDescription}>{item.description}</Text>
+                  <View style={styles.serviceCardDetails}>
+                    <View style={styles.serviceCardDetail}>
+                      <DollarSign size={14} color="#8E8E93" />
+                      <Text style={styles.serviceCardDetailText}>{item.price}</Text>
+                    </View>
+                    <View style={styles.serviceCardDetail}>
+                      <Clock size={14} color="#8E8E93" />
+                      <Text style={styles.serviceCardDetailText}>{item.timeframe}</Text>
+                    </View>
+                  </View>
                 </View>
                 <ChevronRight size={24} color="#8E8E93" />
               </TouchableOpacity>
@@ -438,11 +547,72 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#8E8E93',
   },
+  serviceCardDetails: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 16,
+  },
+  serviceCardDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  serviceCardDetailText: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginLeft: 4,
+  },
   serviceFullDescription: {
     fontSize: 16,
     lineHeight: 24,
     color: '#1A1A1A',
     marginBottom: 24,
+  },
+  serviceInfoContainer: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+  },
+  serviceInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  serviceInfoLabel: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginLeft: 12,
+  },
+  serviceInfoValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1A1A1A',
+    marginLeft: 12,
+  },
+  advantagesTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: PRIMARY_COLOR,
+    marginBottom: 12,
+  },
+  advantagesList: {
+    marginBottom: 16,
+  },
+  advantageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  advantageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: PRIMARY_COLOR,
+    marginRight: 8,
+  },
+  advantageText: {
+    fontSize: 16,
+    color: '#1A1A1A',
   },
   noResultsText: {
     textAlign: 'center',
