@@ -6,6 +6,7 @@ const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ServicesScreen() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedAdditionalService, setSelectedAdditionalService] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
   
@@ -56,10 +57,10 @@ export default function ServicesScreen() {
   ];
 
   const additionalServices = [
-    { id: 'plumber', icon: Wrench, title: 'Сантехник', description: 'Ремонт и замена сантехники' },
-    { id: 'electrician', icon: Zap, title: 'Электрик', description: 'Решение проблем с электричеством' },
-    { id: 'cleaning', icon: Brush, title: 'Уборка', description: 'Профессиональная уборка помещений' },
-    { id: 'handyman', icon: Wrench, title: 'Муж на час', description: 'Мелкий бытовой ремонт' },
+    { id: 'plumber', icon: Wrench, title: 'Сантехник', description: 'Ремонт и замена сантехники', fullDescription: 'Профессиональные сантехнические услуги: устранение протечек, замена и установка сантехнического оборудования, прочистка канализации, монтаж систем отопления и водоснабжения. Работаем с любыми видами сантехники и предлагаем гарантию на все виды работ.' },
+    { id: 'electrician', icon: Zap, title: 'Электрик', description: 'Решение проблем с электричеством', fullDescription: 'Квалифицированные услуги электрика: диагностика и ремонт электропроводки, установка розеток и выключателей, замена электрощитов, монтаж светильников, устранение коротких замыканий. Гарантируем безопасность и соблюдение всех норм при выполнении электромонтажных работ.' },
+    { id: 'cleaning', icon: Brush, title: 'Уборка', description: 'Профессиональная уборка помещений', fullDescription: 'Комплексные услуги по уборке помещений: регулярная и генеральная уборка, мытье окон и витражей, химчистка мебели и ковров, уборка после ремонта. Используем профессиональное оборудование и экологичные моющие средства для достижения идеальной чистоты.' },
+    { id: 'handyman', icon: Wrench, title: 'Муж на час', description: 'Мелкий бытовой ремонт', fullDescription: 'Услуги "муж на час" для решения любых бытовых проблем: сборка и ремонт мебели, установка карнизов и полок, навеска телевизоров, замена замков, мелкий ремонт. Оперативный выезд мастера и выполнение работ любой сложности в удобное для вас время.' },
   ];
   
   const filteredServices = searchQuery.length > 0
@@ -68,6 +69,41 @@ export default function ServicesScreen() {
         service.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : additionalServices;
+
+  if (selectedAdditionalService) {
+    const service = additionalServices.find(s => s.id === selectedAdditionalService);
+    
+    if (!service) return null;
+    
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => setSelectedAdditionalService(null)}
+          >
+            <ChevronRight size={24} color={PRIMARY_COLOR} style={{ transform: [{ rotate: '180deg' }] }} />
+            <Text style={styles.backButtonText}>Назад</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.serviceDetailHeader}>
+            <View style={[styles.cardIcon, { backgroundColor: PRIMARY_COLOR }]}>
+              <service.icon size={24} color="#FFFFFF" />
+            </View>
+            <Text style={styles.serviceDetailTitle}>{service.title}</Text>
+          </View>
+          
+          <View style={styles.section}>
+            <Text style={styles.serviceFullDescription}>{service.fullDescription}</Text>
+            
+            <TouchableOpacity style={styles.fullWidthButton}>
+              <Text style={styles.fullWidthButtonText}>Заказать</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (selectedService) {
     const service = services.find(s => s.id === selectedService);
@@ -139,7 +175,14 @@ export default function ServicesScreen() {
           
           <View style={styles.servicesResultsContainer}>
             {filteredServices.map((item, index) => (
-              <TouchableOpacity key={index} style={styles.serviceCard}>
+              <TouchableOpacity 
+                key={index} 
+                style={styles.serviceCard}
+                onPress={() => {
+                  setSelectedAdditionalService(item.id);
+                  setIsSearchActive(false);
+                }}
+              >
                 <item.icon size={24} color={PRIMARY_COLOR} />
                 <View style={styles.serviceInfo}>
                   <Text style={styles.serviceTitle}>{item.title}</Text>
@@ -394,6 +437,12 @@ const styles = StyleSheet.create({
   serviceDescription: {
     fontSize: 14,
     color: '#8E8E93',
+  },
+  serviceFullDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#1A1A1A',
+    marginBottom: 24,
   },
   noResultsText: {
     textAlign: 'center',
