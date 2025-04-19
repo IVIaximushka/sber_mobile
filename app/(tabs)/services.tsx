@@ -1,11 +1,13 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Home, Wifi, Bell, School, ChevronRight } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush } from 'lucide-react-native';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ServicesScreen() {
-  const [selectedService, setSelectedService] = useState(null);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showServiceResults, setShowServiceResults] = useState(false);
   
   const services = [
     { 
@@ -53,8 +55,25 @@ export default function ServicesScreen() {
     },
   ];
 
+  const additionalServices = [
+    { id: 'plumber', icon: Wrench, title: 'Сантехник', description: 'Ремонт и замена сантехники' },
+    { id: 'electrician', icon: Zap, title: 'Электрик', description: 'Решение проблем с электричеством' },
+    { id: 'cleaning', icon: Brush, title: 'Уборка', description: 'Профессиональная уборка помещений' },
+    { id: 'handyman', icon: Wrench, title: 'Муж на час', description: 'Мелкий бытовой ремонт' },
+  ];
+  
+  const filteredServices = searchQuery.length > 0
+    ? additionalServices.filter(service => 
+        service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : additionalServices;
+
   if (selectedService) {
     const service = services.find(s => s.id === selectedService);
+    
+    if (!service) return null;
+    
     return (
       <ScrollView style={styles.container}>
         <View style={styles.content}>
@@ -113,9 +132,47 @@ export default function ServicesScreen() {
                   <Text style={styles.detailsText}>Посмотреть детали</Text>
                   <ChevronRight size={16} color={PRIMARY_COLOR} />
                 </View>
+                <TouchableOpacity style={styles.payButton}>
+                  <Text style={styles.payButtonText}>Оплатить</Text>
+                </TouchableOpacity>
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Поиск услуг</Text>
+          <View style={styles.searchContainer}>
+            <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Найти услугу (сантехник, электрик, уборка...)"
+              value={searchQuery}
+              onChangeText={text => {
+                setSearchQuery(text);
+                setShowServiceResults(text.length > 0);
+              }}
+              onFocus={() => setShowServiceResults(true)}
+            />
+          </View>
+          
+          {showServiceResults && (
+            <View style={styles.servicesResultsContainer}>
+              {filteredServices.map((item, index) => (
+                <TouchableOpacity key={index} style={styles.serviceCard}>
+                  <item.icon size={24} color={PRIMARY_COLOR} />
+                  <View style={styles.serviceInfo}>
+                    <Text style={styles.serviceTitle}>{item.title}</Text>
+                    <Text style={styles.serviceDescription}>{item.description}</Text>
+                  </View>
+                  <ChevronRight size={24} color="#8E8E93" />
+                </TouchableOpacity>
+              ))}
+              {filteredServices.length === 0 && searchQuery.length > 0 && (
+                <Text style={styles.noResultsText}>Услуги не найдены</Text>
+              )}
+            </View>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -181,6 +238,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
+    marginBottom: 12,
   },
   detailsText: {
     fontSize: 14,
@@ -239,5 +297,69 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  payButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginTop: 4,
+  },
+  payButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '500',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1A1A1A',
+  },
+  servicesResultsContainer: {
+    marginTop: 8,
+  },
+  serviceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: '#5a2a37',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  serviceInfo: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  serviceTitle: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 4,
+    color: '#1A1A1A',
+  },
+  serviceDescription: {
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  noResultsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#8E8E93',
+    padding: 20,
   }
 });
