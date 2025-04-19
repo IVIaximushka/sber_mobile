@@ -1,55 +1,351 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { Droplet, Zap, Flame, Thermometer, Wrench, Brush, ChevronRight } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush, ArrowLeft, Clock, DollarSign, Award } from 'lucide-react-native';
+import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ServicesScreen() {
-  const utilities = [
-    { icon: Droplet, title: 'Вода', amount: '1,234.56 ₽' },
-    { icon: Zap, title: 'Электричество', amount: '2,345.67 ₽' },
-    { icon: Flame, title: 'Газ', amount: '789.12 ₽' },
-    { icon: Thermometer, title: 'Отопление', amount: '3,456.78 ₽' },
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [selectedAdditionalService, setSelectedAdditionalService] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  
+  const services = [
+    { 
+      id: 'zhkh', 
+      icon: Home, 
+      title: 'Оплата ЖКХ', 
+      amount: '3,456.78 ₽',
+      details: [
+        { name: 'Отопление', amount: '1,234.56 ₽' },
+        { name: 'Вода', amount: '678.90 ₽' },
+        { name: 'Электричество', amount: '890.12 ₽' },
+        { name: 'Газ', amount: '653.20 ₽' }
+      ]
+    },
+    { 
+      id: 'internet', 
+      icon: Wifi, 
+      title: 'Интернет', 
+      amount: '750.00 ₽',
+      details: [
+        { name: 'Абонентская плата', amount: '650.00 ₽' },
+        { name: 'Дополнительные услуги', amount: '100.00 ₽' }
+      ]
+    },
+    { 
+      id: 'security', 
+      icon: Bell, 
+      title: 'Сигнализация', 
+      amount: '1,200.00 ₽',
+      details: [
+        { name: 'Охрана квартиры', amount: '800.00 ₽' },
+        { name: 'Мониторинг', amount: '400.00 ₽' }
+      ]
+    },
+    { 
+      id: 'kindergarten', 
+      icon: School, 
+      title: 'Садик', 
+      amount: '2,500.00 ₽',
+      details: [
+        { name: 'Питание', amount: '1,500.00 ₽' },
+        { name: 'Образовательные услуги', amount: '800.00 ₽' },
+        { name: 'Дополнительные занятия', amount: '200.00 ₽' }
+      ]
+    },
   ];
 
-  const services = [
-    { icon: Wrench, title: 'Вызов мастера', description: 'Сантехник, электрик, слесарь' },
-    { icon: Brush, title: 'Уборка помещений', description: 'Мытье окон, уборка подъезда' },
+  const additionalServices = [
+    { 
+      id: 'plumber', 
+      icon: Wrench, 
+      title: 'Сантехник', 
+      description: 'Ремонт и замена сантехники', 
+      fullDescription: 'Профессиональные сантехнические услуги: устранение протечек, замена и установка сантехнического оборудования, прочистка канализации, монтаж систем отопления и водоснабжения. Работаем с любыми видами сантехники и предлагаем гарантию на все виды работ.',
+      price: 'от 1,500 ₽',
+      timeframe: '1-3 часа',
+      warranty: '1 год на все работы',
+      advantages: [
+        'Оперативный выезд',
+        'Профессиональное оборудование',
+        'Опыт более 10 лет',
+        'Фиксированная цена после осмотра'
+      ]
+    },
+    { 
+      id: 'electrician', 
+      icon: Zap, 
+      title: 'Электрик', 
+      description: 'Решение проблем с электричеством', 
+      fullDescription: 'Квалифицированные услуги электрика: диагностика и ремонт электропроводки, установка розеток и выключателей, замена электрощитов, монтаж светильников, устранение коротких замыканий. Гарантируем безопасность и соблюдение всех норм при выполнении электромонтажных работ.',
+      price: 'от 1,200 ₽',
+      timeframe: '1-5 часов',
+      warranty: '2 года на все работы',
+      advantages: [
+        'Сертифицированные мастера',
+        'Работаем с любой сложностью',
+        'Соблюдение всех норм ПУЭ',
+        'Экстренный выезд 24/7'
+      ]
+    },
+    { 
+      id: 'cleaning', 
+      icon: Brush, 
+      title: 'Уборка', 
+      description: 'Профессиональная уборка помещений', 
+      fullDescription: 'Комплексные услуги по уборке помещений: регулярная и генеральная уборка, мытье окон и витражей, химчистка мебели и ковров, уборка после ремонта. Используем профессиональное оборудование и экологичные моющие средства для достижения идеальной чистоты.',
+      price: 'от 2,000 ₽',
+      timeframe: '2-6 часов',
+      warranty: 'Гарантия качества',
+      advantages: [
+        'Экологичные средства',
+        'Обученный персонал',
+        'Работаем в выходные дни',
+        'Скидки на регулярную уборку'
+      ]
+    },
+    { 
+      id: 'handyman', 
+      icon: Wrench, 
+      title: 'Муж на час', 
+      description: 'Мелкий бытовой ремонт', 
+      fullDescription: 'Услуги "муж на час" для решения любых бытовых проблем: сборка и ремонт мебели, установка карнизов и полок, навеска телевизоров, замена замков, мелкий ремонт. Оперативный выезд мастера и выполнение работ любой сложности в удобное для вас время.',
+      price: 'от 1,000 ₽/час',
+      timeframe: '1-4 часа',
+      warranty: '6 месяцев',
+      advantages: [
+        'Универсальные мастера',
+        'Свой инструмент',
+        'Выезд в день обращения',
+        'Работы любой сложности'
+      ]
+    },
   ];
+  
+  const filteredServices = searchQuery.length > 0
+    ? additionalServices.filter(service => 
+        service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : additionalServices;
+
+  if (selectedAdditionalService) {
+    const service = additionalServices.find(s => s.id === selectedAdditionalService);
+    
+    if (!service) return null;
+    
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => {
+              setSelectedAdditionalService(null);
+              setIsSearchActive(true);
+            }}
+          >
+            <ChevronRight size={24} color={PRIMARY_COLOR} style={{ transform: [{ rotate: '180deg' }] }} />
+            <Text style={styles.backButtonText}>Назад к поиску</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.serviceDetailHeader}>
+            <View style={[styles.cardIcon, { backgroundColor: PRIMARY_COLOR }]}>
+              <service.icon size={24} color="#FFFFFF" />
+            </View>
+            <Text style={styles.serviceDetailTitle}>{service.title}</Text>
+          </View>
+          
+          <View style={styles.section}>
+            <Text style={styles.serviceFullDescription}>{service.fullDescription}</Text>
+            
+            <View style={styles.serviceInfoContainer}>
+              <View style={styles.serviceInfoItem}>
+                <DollarSign size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Стоимость</Text>
+                  <Text style={styles.serviceInfoValue}>{service.price}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.serviceInfoItem}>
+                <Clock size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Сроки выполнения</Text>
+                  <Text style={styles.serviceInfoValue}>{service.timeframe}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.serviceInfoItem}>
+                <Award size={20} color={PRIMARY_COLOR} />
+                <View>
+                  <Text style={styles.serviceInfoLabel}>Гарантия</Text>
+                  <Text style={styles.serviceInfoValue}>{service.warranty}</Text>
+                </View>
+              </View>
+            </View>
+            
+            <Text style={styles.advantagesTitle}>Преимущества</Text>
+            <View style={styles.advantagesList}>
+              {service.advantages.map((advantage, index) => (
+                <View key={index} style={styles.advantageItem}>
+                  <View style={styles.advantageDot} />
+                  <Text style={styles.advantageText}>{advantage}</Text>
+                </View>
+              ))}
+            </View>
+            
+            <TouchableOpacity style={styles.fullWidthButton}>
+              <Text style={styles.fullWidthButtonText}>Заказать</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  if (selectedService) {
+    const service = services.find(s => s.id === selectedService);
+    
+    if (!service) return null;
+    
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => setSelectedService(null)}
+          >
+            <ChevronRight size={24} color={PRIMARY_COLOR} style={{ transform: [{ rotate: '180deg' }] }} />
+            <Text style={styles.backButtonText}>Назад</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.serviceDetailHeader}>
+            <View style={[styles.cardIcon, { backgroundColor: PRIMARY_COLOR }]}>
+              <service.icon size={24} color="#FFFFFF" />
+            </View>
+            <Text style={styles.serviceDetailTitle}>{service.title}</Text>
+            <Text style={styles.serviceDetailAmount}>{service.amount}</Text>
+          </View>
+          
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Детализация</Text>
+            {service.details.map((item, index) => (
+              <View key={index} style={styles.detailItem}>
+                <Text style={styles.detailName}>{item.name}</Text>
+                <Text style={styles.detailAmount}>{item.amount}</Text>
+              </View>
+            ))}
+            
+            <TouchableOpacity style={styles.fullWidthButton}>
+              <Text style={styles.fullWidthButtonText}>Оплатить</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  if (isSearchActive) {
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.searchSection}>
+            <View style={styles.searchContainerActive}>
+              <TouchableOpacity 
+                onPress={() => {
+                  setIsSearchActive(false);
+                  setSearchQuery('');
+                }}
+                style={styles.backIconContainer}
+              >
+                <ArrowLeft size={20} color="#1A1A1A" />
+              </TouchableOpacity>
+              <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Найти услугу (сантехник, электрик, уборка...)"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus={true}
+              />
+            </View>
+          </View>
+          
+          <View style={styles.servicesResultsContainer}>
+            {filteredServices.map((item, index) => (
+              <TouchableOpacity 
+                key={index} 
+                style={styles.serviceCard}
+                onPress={() => {
+                  setSelectedAdditionalService(item.id);
+                  setIsSearchActive(false);
+                }}
+              >
+                <item.icon size={24} color={PRIMARY_COLOR} />
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceTitle}>{item.title}</Text>
+                  <Text style={styles.serviceDescription}>{item.description}</Text>
+                  <View style={styles.serviceCardDetails}>
+                    <View style={styles.serviceCardDetail}>
+                      <DollarSign size={14} color="#8E8E93" />
+                      <Text style={styles.serviceCardDetailText}>{item.price}</Text>
+                    </View>
+                    <View style={styles.serviceCardDetail}>
+                      <Clock size={14} color="#8E8E93" />
+                      <Text style={styles.serviceCardDetailText}>{item.timeframe}</Text>
+                    </View>
+                  </View>
+                </View>
+                <ChevronRight size={24} color="#8E8E93" />
+              </TouchableOpacity>
+            ))}
+            {filteredServices.length === 0 && searchQuery.length > 0 && (
+              <Text style={styles.noResultsText}>Услуги не найдены</Text>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-
       <View style={styles.content}>
+        <View style={styles.searchSection}>
+          <TouchableOpacity 
+            style={styles.searchContainer}
+            onPress={() => setIsSearchActive(true)}
+          >
+            <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+            <Text style={styles.searchPlaceholder}>Найти услугу (сантехник, электрик, уборка...)</Text>
+          </TouchableOpacity>
+        </View>
+        
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Коммунальные услуги</Text>
+          <Text style={styles.sectionTitle}>Платежи</Text>
           <View style={styles.cardsContainer}>
-            {utilities.map((item, index) => (
-              <TouchableOpacity key={index} style={styles.card}>
+            {services.map((item, index) => (
+              <TouchableOpacity 
+                key={index} 
+                style={styles.card}
+                onPress={() => setSelectedService(item.id)}
+              >
                 <View style={[styles.cardIcon, { backgroundColor: PRIMARY_COLOR }]}>
                   <item.icon size={24} color="#FFFFFF" />
                 </View>
                 <Text style={styles.cardTitle}>{item.title}</Text>
                 <Text style={styles.utilityAmount}>{item.amount}</Text>
+                <View style={styles.cardFooter}>
+                  <Text style={styles.detailsText}>Посмотреть детали</Text>
+                  <ChevronRight size={16} color={PRIMARY_COLOR} />
+                </View>
                 <TouchableOpacity style={styles.payButton}>
                   <Text style={styles.payButtonText}>Оплатить</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
           </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Заказать услуги</Text>
-          {services.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.serviceCard}>
-              <item.icon size={24} color={PRIMARY_COLOR} />
-              <View style={styles.serviceInfo}>
-                <Text style={styles.serviceTitle}>{item.title}</Text>
-                <Text style={styles.serviceDescription}>{item.description}</Text>
-              </View>
-              <ChevronRight size={24} color="#8E8E93" />
-            </TouchableOpacity>
-          ))}
         </View>
       </View>
     </ScrollView>
@@ -66,6 +362,9 @@ const styles = StyleSheet.create({
     paddingTop: 90,
   },
   section: {
+    marginBottom: 24,
+  },
+  searchSection: {
     marginBottom: 24,
   },
   sectionTitle: {
@@ -109,17 +408,117 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: PRIMARY_COLOR,
+    marginVertical: 8,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
     marginBottom: 12,
+  },
+  detailsText: {
+    fontSize: 14,
+    color: PRIMARY_COLOR,
+    marginRight: 4,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  backButtonText: {
+    fontSize: 16,
+    color: PRIMARY_COLOR,
+    marginLeft: 4,
+  },
+  serviceDetailHeader: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  serviceDetailTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginVertical: 8,
+  },
+  serviceDetailAmount: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: PRIMARY_COLOR,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F7',
+  },
+  detailName: {
+    fontSize: 16,
+    color: '#1A1A1A',
+  },
+  detailAmount: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: PRIMARY_COLOR,
+  },
+  fullWidthButton: {
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  fullWidthButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   payButton: {
     backgroundColor: PRIMARY_COLOR,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 12,
+    marginTop: 4,
   },
   payButtonText: {
     color: '#FFFFFF',
     fontWeight: '500',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  searchContainerActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  backIconContainer: {
+    paddingRight: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1A1A1A',
+  },
+  searchPlaceholder: {
+    flex: 1, 
+    fontSize: 16,
+    color: '#8E8E93',
+  },
+  servicesResultsContainer: {
+    marginTop: 8,
   },
   serviceCard: {
     flexDirection: 'row',
@@ -148,4 +547,77 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#8E8E93',
   },
+  serviceCardDetails: {
+    flexDirection: 'row',
+    marginTop: 8,
+    gap: 16,
+  },
+  serviceCardDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  serviceCardDetailText: {
+    fontSize: 12,
+    color: '#8E8E93',
+    marginLeft: 4,
+  },
+  serviceFullDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#1A1A1A',
+    marginBottom: 24,
+  },
+  serviceInfoContainer: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+  },
+  serviceInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  serviceInfoLabel: {
+    fontSize: 14,
+    color: '#8E8E93',
+    marginLeft: 12,
+  },
+  serviceInfoValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1A1A1A',
+    marginLeft: 12,
+  },
+  advantagesTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: PRIMARY_COLOR,
+    marginBottom: 12,
+  },
+  advantagesList: {
+    marginBottom: 16,
+  },
+  advantageItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  advantageDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: PRIMARY_COLOR,
+    marginRight: 8,
+  },
+  advantageText: {
+    fontSize: 16,
+    color: '#1A1A1A',
+  },
+  noResultsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#8E8E93',
+    padding: 20,
+  }
 });
