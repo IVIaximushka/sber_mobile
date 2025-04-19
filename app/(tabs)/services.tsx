@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush } from 'lucide-react-native';
+import { Home, Wifi, Bell, School, ChevronRight, Search, Wrench, Zap, Brush, ArrowLeft } from 'lucide-react-native';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
@@ -7,7 +7,7 @@ const PRIMARY_COLOR = '#8B1E3F';
 export default function ServicesScreen() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showServiceResults, setShowServiceResults] = useState(false);
+  const [isSearchActive, setIsSearchActive] = useState(false);
   
   const services = [
     { 
@@ -111,9 +111,65 @@ export default function ServicesScreen() {
     );
   }
 
+  if (isSearchActive) {
+    return (
+      <ScrollView style={styles.container}>
+        <View style={styles.content}>
+          <View style={styles.searchSection}>
+            <View style={styles.searchContainerActive}>
+              <TouchableOpacity 
+                onPress={() => {
+                  setIsSearchActive(false);
+                  setSearchQuery('');
+                }}
+                style={styles.backIconContainer}
+              >
+                <ArrowLeft size={20} color="#1A1A1A" />
+              </TouchableOpacity>
+              <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Найти услугу (сантехник, электрик, уборка...)"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus={true}
+              />
+            </View>
+          </View>
+          
+          <View style={styles.servicesResultsContainer}>
+            {filteredServices.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.serviceCard}>
+                <item.icon size={24} color={PRIMARY_COLOR} />
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceTitle}>{item.title}</Text>
+                  <Text style={styles.serviceDescription}>{item.description}</Text>
+                </View>
+                <ChevronRight size={24} color="#8E8E93" />
+              </TouchableOpacity>
+            ))}
+            {filteredServices.length === 0 && searchQuery.length > 0 && (
+              <Text style={styles.noResultsText}>Услуги не найдены</Text>
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
+        <View style={styles.searchSection}>
+          <TouchableOpacity 
+            style={styles.searchContainer}
+            onPress={() => setIsSearchActive(true)}
+          >
+            <Search size={20} color="#8E8E93" style={styles.searchIcon} />
+            <Text style={styles.searchPlaceholder}>Найти услугу (сантехник, электрик, уборка...)</Text>
+          </TouchableOpacity>
+        </View>
+        
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Услуги</Text>
           <View style={styles.cardsContainer}>
@@ -139,41 +195,6 @@ export default function ServicesScreen() {
             ))}
           </View>
         </View>
-        
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Поиск услуг</Text>
-          <View style={styles.searchContainer}>
-            <Search size={20} color="#8E8E93" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Найти услугу (сантехник, электрик, уборка...)"
-              value={searchQuery}
-              onChangeText={text => {
-                setSearchQuery(text);
-                setShowServiceResults(text.length > 0);
-              }}
-              onFocus={() => setShowServiceResults(true)}
-            />
-          </View>
-          
-          {showServiceResults && (
-            <View style={styles.servicesResultsContainer}>
-              {filteredServices.map((item, index) => (
-                <TouchableOpacity key={index} style={styles.serviceCard}>
-                  <item.icon size={24} color={PRIMARY_COLOR} />
-                  <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceTitle}>{item.title}</Text>
-                    <Text style={styles.serviceDescription}>{item.description}</Text>
-                  </View>
-                  <ChevronRight size={24} color="#8E8E93" />
-                </TouchableOpacity>
-              ))}
-              {filteredServices.length === 0 && searchQuery.length > 0 && (
-                <Text style={styles.noResultsText}>Услуги не найдены</Text>
-              )}
-            </View>
-          )}
-        </View>
       </View>
     </ScrollView>
   );
@@ -189,6 +210,9 @@ const styles = StyleSheet.create({
     paddingTop: 90,
   },
   section: {
+    marginBottom: 24,
+  },
+  searchSection: {
     marginBottom: 24,
   },
   sectionTitle: {
@@ -315,7 +339,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#F2F2F7',
     borderRadius: 10,
     paddingHorizontal: 12,
-    marginBottom: 16,
+    paddingVertical: 12,
+  },
+  searchContainerActive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F2F2F7',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+  },
+  backIconContainer: {
+    paddingRight: 8,
   },
   searchIcon: {
     marginRight: 8,
@@ -325,6 +359,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: '#1A1A1A',
+  },
+  searchPlaceholder: {
+    flex: 1, 
+    fontSize: 16,
+    color: '#8E8E93',
   },
   servicesResultsContainer: {
     marginTop: 8,
