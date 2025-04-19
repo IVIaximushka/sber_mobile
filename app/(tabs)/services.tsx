@@ -171,7 +171,7 @@ export default function ServicesScreen() {
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Услуги</Text>
+          <Text style={styles.sectionTitle}>Платежи</Text>
           <View style={styles.cardsContainer}>
             {services.map((item, index) => (
               <TouchableOpacity 
