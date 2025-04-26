@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { usePathname } from 'expo-router';
 
 interface NavigationContextType {
@@ -18,19 +18,29 @@ export const useNavigation = () => useContext(NavigationContext);
 export const NavigationProvider = ({ children }: { children: React.ReactNode }) => {
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
   const pathname = usePathname();
+  const isProcessingUpdate = useRef(false);
+  const previousPathname = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!pathname) return;
+    if (!pathname || pathname === previousPathname.current || isProcessingUpdate.current) return;
+    
+    // Запоминаем текущий путь для предотвращения лишних обновлений
+    previousPathname.current = pathname;
+    isProcessingUpdate.current = true;
 
-    // Проверяем, является ли текущий переход сменой вкладок
-    if (isTabPath(pathname) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
-      // Если переход между вкладками - заменяем последнюю запись в истории
-      setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), pathname]);
-    } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== pathname) {
-      // В остальных случаях добавляем новую запись
-      setNavigationHistory(prev => [...prev, pathname]);
+    try {
+      // Проверяем, является ли текущий переход сменой вкладок
+      if (isTabPath(pathname) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
+        // Если переход между вкладками - заменяем последнюю запись в истории
+        setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), pathname]);
+      } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== pathname) {
+        // В остальных случаях добавляем новую запись
+        setNavigationHistory(prev => [...prev, pathname]);
+      }
+    } finally {
+      isProcessingUpdate.current = false;
     }
-  }, [pathname, navigationHistory]);
+  }, [pathname]);
 
   // Проверка, является ли путь вкладкой (одним из главных экранов)
   const isTabPath = (path: string): boolean => {
@@ -45,14 +55,19 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const addToHistory = (path: string) => {
-    if (!path) return;
+    if (!path || isProcessingUpdate.current) return;
     
-    if (isTabPath(path) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
-      // Если добавляем таб и последняя запись тоже таб - заменяем
-      setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), path]);
-    } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== path) {
-      // В остальных случаях добавляем новую запись
-      setNavigationHistory(prev => [...prev, path]);
+    isProcessingUpdate.current = true;
+    try {
+      if (isTabPath(path) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
+        // Если добавляем таб и последняя запись тоже таб - заменяем
+        setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), path]);
+      } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== path) {
+        // В остальных случаях добавляем новую запись
+        setNavigationHistory(prev => [...prev, path]);
+      }
+    } finally {
+      isProcessingUpdate.current = false;
     }
   };
 
