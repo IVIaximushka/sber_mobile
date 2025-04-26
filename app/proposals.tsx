@@ -54,6 +54,13 @@ export default function ProposalsScreen() {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
+        // Если открыто модальное окно, закрываем его
+        if (selectedProposal) {
+          setSelectedProposal(null);
+          return true;
+        }
+        
+        // Иначе используем историю навигации
         const previousScreen = customNavigation.getPreviousScreen();
         if (previousScreen) {
           router.push(previousScreen);
@@ -66,7 +73,7 @@ export default function ProposalsScreen() {
       BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [router, customNavigation])
+    }, [router, customNavigation, selectedProposal])
   );
 
   const handleVote = (proposalId: string, vote: 'for' | 'against') => {
@@ -84,12 +91,22 @@ export default function ProposalsScreen() {
     setSelectedProposal(null);
   };
 
+  // Обработчик нажатия кнопки назад в заголовке
+  const handleBackPress = () => {
+    const previousScreen = customNavigation.getPreviousScreen();
+    if (previousScreen) {
+      router.push(previousScreen);
+    } else {
+      router.push('/(tabs)');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={handleBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Предложения жильцов</Text>

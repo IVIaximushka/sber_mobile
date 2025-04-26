@@ -95,12 +95,22 @@ export default function ChatScreen() {
     }
   };
 
+  // Обработчик нажатия кнопки назад в заголовке
+  const handleBackPress = () => {
+    const previousScreen = customNavigation.getPreviousScreen();
+    if (previousScreen) {
+      router.push(previousScreen);
+    } else {
+      router.push('/(tabs)/chat');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={handleBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerContent}>

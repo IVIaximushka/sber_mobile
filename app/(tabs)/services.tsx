@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, ScrollView, BackHandler } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useNavigation } from '../../lib/navigationContext';
@@ -26,6 +26,7 @@ export default function ServicesScreen() {
   const [selectedAdditionalService, setSelectedAdditionalService] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [previousScreenPath, setPreviousScreenPath] = useState<string | null>(null);
   
   const filteredServices = searchQuery.length > 0
     ? additionalServices.filter(service => 
@@ -34,10 +35,39 @@ export default function ServicesScreen() {
       )
     : additionalServices;
 
+  // Сохраняем предыдущий экран при монтировании компонента
+  useEffect(() => {
+    const path = customNavigation.getPreviousScreen();
+    if (path) {
+      setPreviousScreenPath(path);
+    }
+  }, []);
+
   // Настраиваем обработку кнопки "назад"
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
+        // Если открыты детали сервиса, возвращаемся к списку
+        if (selectedService) {
+          setSelectedService(null);
+          return true;
+        }
+        
+        // Если открыты детали доп. сервиса, возвращаемся к поиску
+        if (selectedAdditionalService) {
+          setSelectedAdditionalService(null);
+          setIsSearchActive(true);
+          return true;
+        }
+        
+        // Если активен поиск, закрываем его
+        if (isSearchActive) {
+          setIsSearchActive(false);
+          setSearchQuery('');
+          return true;
+        }
+        
+        // В противном случае используем историю навигации
         const previousScreen = customNavigation.getPreviousScreen();
         if (previousScreen) {
           router.push(previousScreen);
@@ -50,7 +80,7 @@ export default function ServicesScreen() {
       BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [router, customNavigation])
+    }, [router, customNavigation, selectedService, selectedAdditionalService, isSearchActive])
   );
 
   // Обработчики событий
@@ -79,6 +109,15 @@ export default function ServicesScreen() {
   const handleSearchBack = () => {
     setIsSearchActive(false);
     setSearchQuery('');
+  };
+
+  const handleBackButton = () => {
+    // Проверяем наличие предыдущего экрана
+    if (previousScreenPath) {
+      router.push(previousScreenPath);
+    } else {
+      router.push('/(tabs)');
+    }
   };
 
   // Отображение деталей выбранной дополнительной услуги

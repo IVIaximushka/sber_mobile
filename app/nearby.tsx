@@ -113,6 +113,13 @@ export default function NearbyScreen() {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
+        // Если открыто модальное окно QR-кода, закрываем его
+        if (showQRCode) {
+          setShowQRCode(false);
+          return true;
+        }
+        
+        // Иначе используем историю навигации
         const previousScreen = customNavigation.getPreviousScreen();
         if (previousScreen) {
           router.push(previousScreen);
@@ -125,7 +132,7 @@ export default function NearbyScreen() {
       BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
       return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [router, customNavigation])
+    }, [router, customNavigation, showQRCode])
   );
 
   const handlePlacePress = (place: Place) => {
@@ -137,6 +144,16 @@ export default function NearbyScreen() {
     setShowQRCode(false);
   };
 
+  // Обработчик нажатия кнопки назад в заголовке
+  const handleBackPress = () => {
+    const previousScreen = customNavigation.getPreviousScreen();
+    if (previousScreen) {
+      router.push(previousScreen);
+    } else {
+      router.push('/(tabs)');
+    }
+  };
+
   return (
     <LinearGradient
       colors={GRADIENT_COLORS}
@@ -144,7 +161,7 @@ export default function NearbyScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={handleBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Рядом с домом</Text>
