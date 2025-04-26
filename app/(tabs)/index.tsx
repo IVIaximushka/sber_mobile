@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image, ImageBackground, Modal, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent, ThumbsUp, ThumbsDown, Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../lib/authContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
@@ -218,9 +219,40 @@ type Styles = {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { state, getProfile } = useAuth();
   const [scrollPosition, setScrollPosition] = useState(0);
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
+  const [profileData, setProfileData] = useState<{username?: string}>({});
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const profile = await getProfile();
+        if (profile) {
+          setProfileData({
+            username: profile.username
+          });
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке профиля:', error);
+      }
+    }
+
+    loadProfile();
+  }, [getProfile]);
+
+  // Используем данные профиля
+  const userName = profileData.username || state.user?.user_metadata?.username || 'Пользователь';
+  
+  // Получаем инициалы для аватара
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const emergencies = [
     {
@@ -315,11 +347,11 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <View style={styles.userInfo}>
               <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarText}>АИ</Text>
+                <Text style={styles.avatarText}>{getInitials(userName)}</Text>
               </View>
               <View style={styles.userTextContainer}>
                 <Text style={[styles.greeting, { color: '#FFFFFF' }]}>Добрый день,</Text>
-                <Text style={[styles.userName, { color: '#FFFFFF' }]}>Анна Иванова</Text>
+                <Text style={[styles.userName, { color: '#FFFFFF' }]}>{userName}</Text>
               </View>
             </View>
             <TouchableOpacity 

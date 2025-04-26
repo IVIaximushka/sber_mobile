@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { ChevronRight, Square, Video } from 'lucide-react-native';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ActivityIndicator, Image, Platform } from 'react-native';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { ChevronRight, Square, Video, Camera } from 'lucide-react-native';
 
 import { styles } from './CameraStyles';
 import { CameraItem } from './CameraData';
@@ -25,6 +25,43 @@ export function CameraItemComponent({
   onRecordPress,
   onLoadEnd
 }: CameraItemProps) {
+  const [loadError, setLoadError] = useState(false);
+  const webViewRef = useRef<WebView>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleWebViewMessage = useCallback((event: WebViewMessageEvent) => {
+    try {
+      const { data } = event.nativeEvent;
+      if (data === 'error') {
+        setLoadError(true);
+        onLoadEnd(camera.id);
+        // Пробуем перезагрузить через 5 секунд
+        retryTimeoutRef.current = setTimeout(() => {
+          if (webViewRef.current) {
+            webViewRef.current.reload();
+          }
+        }, 5000);
+      } else if (data === 'loaded') {
+        setLoadError(false);
+        onLoadEnd(camera.id);
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+        }
+      }
+    } catch (error) {
+      console.error('Error handling WebView message:', error);
+    }
+  }, [camera.id, onLoadEnd]);
+
+  // Очищаем таймер при размонтировании
+  useEffect(() => {
+    return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // HTML-контент для веб-представления камеры
   const htmlContent = (url: string) => `
     <!DOCTYPE html>
@@ -40,6 +77,7 @@ export function CameraItemComponent({
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
           }
           img { 
             width: 100%; 
@@ -56,13 +94,43 @@ export function CameraItemComponent({
             background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
             border-radius: 12px;
           }
+          .error-message {
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+          }
         </style>
       </head>
       <body>
         <div style="position: relative; width: 100%; height: 100%;">
-          <img src="${url}" />
+          <img src="${url}" onerror="handleImgError()" id="camera-image" />
           <div class="overlay"></div>
+          <div id="error-container" style="display:none;" class="error-message">
+            Не удалось загрузить камеру
+          </div>
         </div>
+        <script>
+          function handleImgError() {
+            document.getElementById('camera-image').style.display = 'none';
+            document.getElementById('error-container').style.display = 'flex';
+            window.ReactNativeWebView.postMessage('error');
+          }
+          
+          // Проверка загрузки изображения
+          document.getElementById('camera-image').onload = function() {
+            window.ReactNativeWebView.postMessage('loaded');
+          };
+
+          // Периодическая перезагрузка изображения
+          setInterval(function() {
+            const img = document.getElementById('camera-image');
+            if (img) {
+              const currentSrc = img.src;
+              img.src = currentSrc.split('?')[0] + '?' + new Date().getTime();
+            }
+          }, 30000);
+        </script>
       </body>
     </html>
   `;
@@ -125,21 +193,40 @@ export function CameraItemComponent({
       {isSelected && (
         <View style={styles.cameraWrapper}>
           {loading && <ActivityIndicator size="large" color="#8E8E93" style={styles.loader} />}
-          <WebView
-            source={{ html: htmlContent(camera.url) }}
-            style={styles.camera}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-            startInLoadingState={false}
-            scalesPageToFit={true}
-            originWhitelist={['*']}
-            mixedContentMode="always"
-            onLoadEnd={() => onLoadEnd(camera.id)}
-            onError={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn('WebView error: ', nativeEvent);
-            }}
-          />
+          {loadError ? (
+            <View style={styles.errorContainer}>
+              <Camera size={48} color="#8E8E93" />
+              <Text style={styles.errorText}>Не удалось загрузить камеру</Text>
+            </View>
+          ) : (
+            <WebView
+              ref={webViewRef}
+              source={{ html: htmlContent(camera.url) }}
+              style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+              startInLoadingState={true}
+              scalesPageToFit={true}
+              scrollEnabled={false}
+              bounces={false}
+              allowsInlineMediaPlayback={true}
+              mediaPlaybackRequiresUserAction={false}
+              incognito={true}
+              cacheEnabled={false}
+              onMessage={handleWebViewMessage}
+              renderLoading={() => (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+                  <ActivityIndicator size="large" color="#fff" />
+                </View>
+              )}
+              onError={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.warn('WebView error: ', nativeEvent);
+                setLoadError(true);
+                onLoadEnd(camera.id);
+              }}
+            />
+          )}
         </View>
       )}
     </TouchableOpacity>
