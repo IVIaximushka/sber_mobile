@@ -20,39 +20,44 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
 
   useEffect(() => {
-    // Игнорируем смену вкладок - они не считаются частью истории навигации
-    if (pathname && !isTabSwitch(pathname, navigationHistory)) {
-      if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== pathname) {
-        setNavigationHistory(prev => [...prev, pathname]);
-        console.log('Navigation history updated:', [...navigationHistory, pathname]);
-      }
+    if (!pathname) return;
+
+    // Проверяем, является ли текущий переход сменой вкладок
+    if (isTabPath(pathname) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
+      // Если переход между вкладками - заменяем последнюю запись в истории
+      setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), pathname]);
+    } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== pathname) {
+      // В остальных случаях добавляем новую запись
+      setNavigationHistory(prev => [...prev, pathname]);
     }
   }, [pathname, navigationHistory]);
 
-  // Проверка, что переход был между вкладками
-  const isTabSwitch = (currentPath: string, history: string[]) => {
-    if (history.length === 0) return false;
-    
-    const lastPath = history[history.length - 1];
-    // Проверка, являются ли оба пути вкладками
-    return isTabPath(currentPath) && isTabPath(lastPath) && currentPath !== lastPath;
-  };
-
-  // Проверка, является ли путь вкладкой
-  const isTabPath = (path: string) => {
-    return path.startsWith('/(tabs)/');
+  // Проверка, является ли путь вкладкой (одним из главных экранов)
+  const isTabPath = (path: string): boolean => {
+    // Проверяем пути в формате /(tabs)/... и /...
+    return path === '/(tabs)' || 
+           path.startsWith('/(tabs)/') ||
+           path === '/index' || 
+           path === '/chat' || 
+           path === '/services' || 
+           path === '/cameras' || 
+           path === '/profile';
   };
 
   const addToHistory = (path: string) => {
-    if (path && (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== path)) {
+    if (!path) return;
+    
+    if (isTabPath(path) && navigationHistory.length > 0 && isTabPath(navigationHistory[navigationHistory.length - 1])) {
+      // Если добавляем таб и последняя запись тоже таб - заменяем
+      setNavigationHistory(prev => [...prev.slice(0, prev.length - 1), path]);
+    } else if (navigationHistory.length === 0 || navigationHistory[navigationHistory.length - 1] !== path) {
+      // В остальных случаях добавляем новую запись
       setNavigationHistory(prev => [...prev, path]);
-      console.log('Path added to history:', path);
     }
   };
 
   const getPreviousScreen = (): string | null => {
-    // Если мы находимся на любой из главных вкладок, возвращаем null,
-    // это приведет к вызову BackHandler.exitApp()
+    // Если мы на любой из главных вкладок, выходим из приложения
     if (isTabPath(pathname)) {
       return null;
     }
@@ -60,7 +65,7 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
     if (navigationHistory.length <= 1) {
       // Если история пуста или содержит только текущий экран
       // Возвращаем главный экран для обычных экранов
-      return '/(tabs)';
+      return '/index';
     }
     
     // Находим предыдущий экран (пропускаем текущий экран)

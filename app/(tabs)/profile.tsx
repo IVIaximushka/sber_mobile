@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [loading, setLoading] = useState(true);
 
-  // Настраиваем обработку кнопки "назад"
+  // Настраиваем обработчик кнопки "назад"
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {

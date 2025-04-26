@@ -150,7 +150,7 @@ export default function NearbyScreen() {
     if (previousScreen) {
       router.push(previousScreen);
     } else {
-      router.push('/(tabs)');
+      router.push('/index');
     }
   };
 
