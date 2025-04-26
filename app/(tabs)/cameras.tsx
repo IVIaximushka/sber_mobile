@@ -19,9 +19,9 @@ export default function CamerasScreen() {
   const handleCameraPress = (cameraId: number) => {
     if (selectedCamera === cameraId) {
       setSelectedCamera(null);
+      setLoading(false);
     } else {
       setSelectedCamera(cameraId);
-      // Сбрасываем состояние загрузки при каждом переключении камеры
       setLoading(true);
     }
   };
@@ -38,8 +38,10 @@ export default function CamerasScreen() {
     });
   };
 
-  const handleLoadEnd = () => {
-    setLoading(false);
+  const handleLoadEnd = (cameraId: number) => {
+    if (selectedCamera === cameraId) {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,6 +57,7 @@ export default function CamerasScreen() {
           loading={loading && selectedCamera === camera.id}
           onCameraPress={handleCameraPress}
           onRecordPress={handleRecordPress}
+          onLoadEnd={handleLoadEnd}
         />
       ))}
 

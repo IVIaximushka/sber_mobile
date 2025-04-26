@@ -13,6 +13,7 @@ interface CameraItemProps {
   loading: boolean;
   onCameraPress: (id: number) => void;
   onRecordPress: (id: number) => void;
+  onLoadEnd: (id: number) => void;
 }
 
 export function CameraItemComponent({
@@ -21,7 +22,8 @@ export function CameraItemComponent({
   isRecording,
   loading,
   onCameraPress,
-  onRecordPress
+  onRecordPress,
+  onLoadEnd
 }: CameraItemProps) {
   // HTML-контент для веб-представления камеры
   const htmlContent = (url: string) => `
@@ -122,14 +124,17 @@ export function CameraItemComponent({
 
       {isSelected && (
         <View style={styles.cameraWrapper}>
-          {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />}
+          {loading && <ActivityIndicator size="large" color="#8E8E93" style={styles.loader} />}
           <WebView
             source={{ html: htmlContent(camera.url) }}
             style={styles.camera}
             javaScriptEnabled={true}
             domStorageEnabled={true}
-            startInLoadingState={true}
+            startInLoadingState={false}
             scalesPageToFit={true}
+            originWhitelist={['*']}
+            mixedContentMode="always"
+            onLoadEnd={() => onLoadEnd(camera.id)}
             onError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
               console.warn('WebView error: ', nativeEvent);
