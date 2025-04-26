@@ -119,7 +119,7 @@ export default function NearbyScreen() {
           return true;
         }
         
-        // Иначе используем историю навигации
+        // В противном случае используем историю навигации
         const previousScreen = customNavigation.getPreviousScreen();
         if (previousScreen) {
           router.push(previousScreen);
@@ -150,7 +150,7 @@ export default function NearbyScreen() {
     if (previousScreen) {
       router.push(previousScreen);
     } else {
-      router.push('/index');
+      router.push('/(tabs)');
     }
   };
 
