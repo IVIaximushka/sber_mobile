@@ -72,7 +72,8 @@ export default function ServicesScreen() {
         if (previousScreen) {
           router.push(previousScreen);
         } else {
-          router.push('/(tabs)');
+          // Выход из приложения на главном экране
+          BackHandler.exitApp();
         }
         return true;
       };

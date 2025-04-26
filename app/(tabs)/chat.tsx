@@ -61,7 +61,7 @@ export default function ChatScreen() {
         if (previousScreen) {
           router.push(previousScreen);
         } else {
-          router.push('/(tabs)');
+          BackHandler.exitApp();
         }
         return true;
       };

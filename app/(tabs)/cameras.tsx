@@ -28,7 +28,8 @@ export default function CamerasScreen() {
         if (previousScreen) {
           router.push(previousScreen);
         } else {
-          router.push('/(tabs)');
+          // Выход из приложения на главном экране
+          BackHandler.exitApp();
         }
         return true;
       };

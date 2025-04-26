@@ -51,23 +51,21 @@ export const NavigationProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const getPreviousScreen = (): string | null => {
+    // Если мы находимся на любой из главных вкладок, возвращаем null,
+    // это приведет к вызову BackHandler.exitApp()
+    if (isTabPath(pathname)) {
+      return null;
+    }
+    
     if (navigationHistory.length <= 1) {
       // Если история пуста или содержит только текущий экран
-      // Возвращаем главный экран для обычных экранов и null для главного экрана
-      if (pathname === '/(tabs)' || pathname === '/(tabs)/index') {
-        return null; // На главном экране будет выполнен BackHandler.exitApp()
-      }
+      // Возвращаем главный экран для обычных экранов
       return '/(tabs)';
     }
     
     // Находим предыдущий экран (пропускаем текущий экран)
     for (let i = navigationHistory.length - 2; i >= 0; i--) {
       const prevPath = navigationHistory[i];
-      
-      // Если мы на вкладке, то не возвращаемся на другую вкладку (возвращаемся на главную)
-      if (isTabPath(pathname) && isTabPath(prevPath) && pathname !== prevPath) {
-        return '/(tabs)';
-      }
       
       // Если текущий путь в истории не совпадает с текущим экраном,
       // значит это подходящий предыдущий экран
