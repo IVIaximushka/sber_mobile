@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -10,11 +10,13 @@ import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  BackHandler
 } from 'react-native';
 import { useAuth } from '../../lib/authContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Link } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 interface ProfileData {
   id: string;
@@ -33,6 +35,26 @@ export default function EditProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const customNavigation = useNavigation();
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)/profile');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   useEffect(() => {
     async function loadProfile() {

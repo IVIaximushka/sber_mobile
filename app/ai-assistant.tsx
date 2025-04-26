@@ -1,12 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { ChevronLeft, Send, HelpCircle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
 export default function AIAssistantScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
     {
@@ -16,6 +20,25 @@ export default function AIAssistantScreen() {
       time: '10:00',
     },
   ]);
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const handleSend = () => {
     if (message.trim()) {

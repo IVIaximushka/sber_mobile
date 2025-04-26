@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, Image, BackHandler } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../lib/authContext';
 import { Animated } from 'react-native';
+import { useNavigation } from '../../lib/navigationContext';
 
 export default function AuthSuccessScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const { state } = useAuth();
   const opacity = new Animated.Value(0);
 
@@ -24,6 +26,21 @@ export default function AuthSuccessScreen() {
 
     return () => clearTimeout(timer);
   }, [router]);
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // После успешного входа кнопка "назад" ведет на главный экран
+        router.replace('/(tabs)');
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router])
+  );
 
   return (
     <Animated.View style={[styles.container, { opacity }]}>

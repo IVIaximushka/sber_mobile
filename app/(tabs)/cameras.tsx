@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { ScrollView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { ScrollView, BackHandler } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 // Импорт компонентов
 import { CameraHeader } from '../components/cameras/CameraHeader';
@@ -11,10 +13,31 @@ import { styles } from '../components/cameras/CameraStyles';
 import { defaultCameras } from '../components/cameras/CameraData';
 
 export default function CamerasScreen() {
+  const router = useRouter();
+  const customNavigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [selectedCamera, setSelectedCamera] = useState<number | null>(null);
   const [recordingCameras, setRecordingCameras] = useState<number[]>([]);
   const [cameras, setCameras] = useState(defaultCameras);
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const handleCameraPress = (cameraId: number) => {
     if (selectedCamera === cameraId) {

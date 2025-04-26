@@ -1,13 +1,35 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, BackHandler } from 'react-native';
 import { useAuth } from '../../lib/authContext';
-import { Link } from 'expo-router';
+import { Link, useRouter, useFocusEffect } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 export default function ResetPasswordScreen() {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const { resetPassword } = useAuth();
+  const router = useRouter();
+  const customNavigation = useNavigation();
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(auth)/signin');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const handleResetPassword = async () => {
     if (email.trim() === '') {

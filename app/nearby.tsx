@@ -1,8 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, Image } from 'react-native';
 import { ChevronLeft, MapPin, QrCode } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 const GRADIENT_COLORS = ['#FFB8B8', '#FF9E9E', '#FFD1D1', '#FFE8E8'] as const;
@@ -102,8 +105,28 @@ const nearbyPlaces: Place[] = [
 
 export default function NearbyScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const handlePlacePress = (place: Place) => {
     setSelectedPlace(place);

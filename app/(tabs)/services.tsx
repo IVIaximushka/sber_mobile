@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, ScrollView, BackHandler } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 // Импорт данных и стилей
 import { styles } from '../components/services/ServiceStyles';
@@ -18,6 +20,8 @@ import { SearchResults } from '../components/services/SearchResults';
 import { AdditionalServiceDetails } from '../components/services/AdditionalServiceDetails';
 
 export default function ServicesScreen() {
+  const router = useRouter();
+  const customNavigation = useNavigation();
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [selectedAdditionalService, setSelectedAdditionalService] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,6 +33,25 @@ export default function ServicesScreen() {
         service.description.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : additionalServices;
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   // Обработчики событий
   const handleSelectPaymentService = (id: string) => {

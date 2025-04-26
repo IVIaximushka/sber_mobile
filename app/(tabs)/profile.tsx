@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, ScrollView, ActivityIndicator, Alert, BackHandler } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useAuth } from '../../lib/authContext';
 import { supabase } from '../../lib/supabase';
+import { useNavigation } from '../../lib/navigationContext';
 
 // Импорт компонентов профиля
 import { ProfileHeader } from '../components/profile/ProfileHeader';
@@ -17,9 +18,29 @@ import { ProfileData, PRIMARY_COLOR } from '../components/profile/ProfileData';
 export default function ProfileScreen() {
   const { state, getProfile } = useAuth();
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [loading, setLoading] = useState(true);
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   useEffect(() => {
     async function loadProfile() {

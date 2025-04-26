@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { AuthProvider, useAuth } from '../lib/authContext';
+import { NavigationProvider } from '../lib/navigationContext';
 
 function RootLayoutNav() {
   const { state } = useAuth();
@@ -61,7 +62,9 @@ const styles = StyleSheet.create({
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <NavigationProvider>
+        <RootLayoutNav />
+      </NavigationProvider>
     </AuthProvider>
   );
 }

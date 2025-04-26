@@ -1,12 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Search, MessageCircle, HelpCircle, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
 export default function ChatScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
 
   const chats = [
@@ -48,6 +52,25 @@ export default function ChatScreen() {
       router.push(`/chat/${chatId}`);
     }
   };
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   return (
     <View style={styles.container}>

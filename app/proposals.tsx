@@ -1,7 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { Users, Calendar, ThumbsUp, ThumbsDown, ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
@@ -43,8 +46,28 @@ const residentProposals = [
 
 export default function ProposalsScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const handleVote = (proposalId: string, vote: 'for' | 'against') => {
     setProposalVotes(prev => ({

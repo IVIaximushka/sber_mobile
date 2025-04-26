@@ -1,11 +1,35 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Bell, ChevronLeft, AlertTriangle, Droplet, Zap, Home, Shield, Calendar } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import React, { useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F'; // бургунди цвет
 
 export default function NotificationsScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
+
+  // Настраиваем обработку кнопки "назад"
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          router.push('/(tabs)');
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const notifications = [
     {

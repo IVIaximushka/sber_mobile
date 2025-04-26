@@ -1,7 +1,10 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image, ImageBackground, Modal, ViewStyle, TextStyle, ImageStyle } from 'react-native';
 import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent, ThumbsUp, ThumbsDown, Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useNavigation } from '../../lib/navigationContext';
 
 const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
@@ -218,6 +221,7 @@ type Styles = {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const customNavigation = useNavigation();
   const [scrollPosition, setScrollPosition] = useState(0);
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
@@ -253,6 +257,26 @@ export default function HomeScreen() {
     },
   ];
 
+  // Настраиваем обработку кнопки "назад" для главного экрана
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        // Проверяем, есть ли предыдущий экран в истории
+        const previousScreen = customNavigation.getPreviousScreen();
+        if (previousScreen) {
+          router.push(previousScreen);
+        } else {
+          // На главном экране кнопка "назад" закрывает приложение
+          BackHandler.exitApp();
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [router, customNavigation])
+  );
 
   const renderSection = (title: string, items: any[], icon: any, onPress: () => void) => (
     <View style={styles.section}>
