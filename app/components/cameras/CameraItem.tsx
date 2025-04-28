@@ -28,6 +28,8 @@ export function CameraItemComponent({
   const [loadError, setLoadError] = useState(false);
   const webViewRef = useRef<WebView>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout>();
+  const retryCountRef = useRef(0);
+  const MAX_RETRIES = 3;
 
   const handleWebViewMessage = useCallback((event: WebViewMessageEvent) => {
     try {
@@ -35,14 +37,21 @@ export function CameraItemComponent({
       if (data === 'error') {
         setLoadError(true);
         onLoadEnd(camera.id);
-        // Пробуем перезагрузить через 5 секунд
-        retryTimeoutRef.current = setTimeout(() => {
-          if (webViewRef.current) {
-            webViewRef.current.reload();
-          }
-        }, 5000);
+        
+        // Пробуем перезагрузить с экспоненциальной задержкой
+        if (retryCountRef.current < MAX_RETRIES) {
+          const delay = Math.pow(2, retryCountRef.current) * 1000;
+          retryCountRef.current++;
+          
+          retryTimeoutRef.current = setTimeout(() => {
+            if (webViewRef.current) {
+              webViewRef.current.reload();
+            }
+          }, delay);
+        }
       } else if (data === 'loaded') {
         setLoadError(false);
+        retryCountRef.current = 0;
         onLoadEnd(camera.id);
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);
@@ -63,27 +72,159 @@ export function CameraItemComponent({
   }, []);
 
   // HTML-контент для веб-представления камеры
-  const htmlContent = (url: string) => `
+  const htmlContent = (url: string) => {
+    // Use a different approach for direct type cameras
+    if (camera.type === 'direct') {
+      return `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <style>
+              html, body { 
+                margin: 0; 
+                padding: 0; 
+                background: #000;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+              }
+              .video-container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+              }
+              img {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                border-radius: 12px;
+              }
+              .overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+                border-radius: 12px;
+                pointer-events: none;
+                z-index: 10;
+              }
+              .error-message {
+                color: white;
+                text-align: center;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 20;
+                background-color: rgba(0,0,0,0.7);
+                padding: 10px;
+                border-radius: 8px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="video-container">
+              <img 
+                id="camera-img" 
+                src="${url}?cacheBuster=${Date.now()}"
+                onerror="handleError()"
+              />
+              <div class="overlay"></div>
+              <div id="error-container" style="display:none;" class="error-message">
+                Не удалось загрузить видео
+              </div>
+            </div>
+            <script>
+              let lastReloadTime = Date.now();
+              let errorCount = 0;
+              const MAX_ERRORS = 3;
+              
+              function handleError() {
+                errorCount++;
+                if (errorCount > MAX_ERRORS) {
+                  document.getElementById('camera-img').style.display = 'none';
+                  document.getElementById('error-container').style.display = 'block';
+                  window.ReactNativeWebView.postMessage('error');
+                } else {
+                  // Try again with a delay
+                  setTimeout(reloadImage, 1000);
+                }
+              }
+              
+              function reloadImage() {
+                const img = document.getElementById('camera-img');
+                img.src = "${url}?cacheBuster=" + Date.now();
+              }
+              
+              // Successfully loaded
+              document.getElementById('camera-img').onload = function() {
+                document.getElementById('camera-img').style.display = 'block';
+                document.getElementById('error-container').style.display = 'none';
+                window.ReactNativeWebView.postMessage('loaded');
+                errorCount = 0;
+              };
+              
+              // Periodically refresh the image (every 500ms)
+              setInterval(reloadImage, 500);
+            </script>
+          </body>
+        </html>
+      `;
+    }
+    
+    // Default approach for other cameras
+    return `
     <!DOCTYPE html>
     <html>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <style>
-          body { 
+          html, body { 
             margin: 0; 
             padding: 0; 
             background: #000;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             overflow: hidden;
           }
-          img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover;
+          iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
             border-radius: 12px;
+            background-color: #000;
+          }
+          img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 12px;
+            background-color: #000;
           }
           .overlay {
             position: absolute;
@@ -93,47 +234,125 @@ export function CameraItemComponent({
             bottom: 0;
             background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
             border-radius: 12px;
+            pointer-events: none;
+            z-index: 10;
           }
           .error-message {
             color: white;
             text-align: center;
             font-family: Arial, sans-serif;
             font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
           }
         </style>
       </head>
       <body>
-        <div style="position: relative; width: 100%; height: 100%;">
-          <img src="${url}" onerror="handleImgError()" id="camera-image" />
+        <div class="video-container">
+          <!-- Try with iframe first -->
+          <iframe 
+            id="camera-iframe"
+            src="${url}" 
+            sandbox="allow-same-origin"
+            allow="accelerometer; autoplay; camera"
+            onload="handleFrameLoad()"
+            onerror="tryFallbackMethod()"
+          ></iframe>
+          
+          <!-- Fallback to refreshing image -->
+          <img 
+            id="camera-image" 
+            src="${url}?t=${Date.now()}" 
+            onerror="handleImageError()" 
+            onload="handleImageLoad()"
+            style="display:none;"
+          />
           <div class="overlay"></div>
           <div id="error-container" style="display:none;" class="error-message">
-            Не удалось загрузить камеру
+            Не удалось загрузить видео
           </div>
         </div>
         <script>
-          function handleImgError() {
-            document.getElementById('camera-image').style.display = 'none';
-            document.getElementById('error-container').style.display = 'flex';
-            window.ReactNativeWebView.postMessage('error');
+          let retryCount = 0;
+          const MAX_RETRIES = 3;
+          let lastUpdateTime = Date.now();
+          let useFallbackMethod = false;
+          let updateInterval;
+          
+          function handleFrameLoad() {
+            if (!useFallbackMethod) {
+              document.getElementById('camera-iframe').style.display = 'block';
+              document.getElementById('camera-image').style.display = 'none';
+              document.getElementById('error-container').style.display = 'none';
+              window.ReactNativeWebView.postMessage('loaded');
+              lastUpdateTime = Date.now();
+            }
           }
           
-          // Проверка загрузки изображения
-          document.getElementById('camera-image').onload = function() {
-            window.ReactNativeWebView.postMessage('loaded');
-          };
-
-          // Периодическая перезагрузка изображения
-          setInterval(function() {
+          function handleFrameError() {
+            tryFallbackMethod();
+          }
+          
+          function tryFallbackMethod() {
+            // Switch to image refresh approach
+            useFallbackMethod = true;
+            document.getElementById('camera-iframe').style.display = 'none';
+            document.getElementById('camera-image').style.display = 'block';
+            
+            // Set up periodic refresh
+            if (updateInterval) clearInterval(updateInterval);
+            updateInterval = setInterval(refreshImage, 500);
+          }
+          
+          function refreshImage() {
             const img = document.getElementById('camera-image');
-            if (img) {
-              const currentSrc = img.src;
-              img.src = currentSrc.split('?')[0] + '?' + new Date().getTime();
+            if (img && useFallbackMethod) {
+              img.src = "${url}?t=" + Date.now();
             }
-          }, 30000);
+          }
+          
+          function handleImageLoad() {
+            if (useFallbackMethod) {
+              document.getElementById('camera-image').style.display = 'block';
+              document.getElementById('error-container').style.display = 'none';
+              window.ReactNativeWebView.postMessage('loaded');
+              retryCount = 0;
+            }
+          }
+          
+          function handleImageError() {
+            if (useFallbackMethod) {
+              retryCount++;
+              if (retryCount > MAX_RETRIES) {
+                document.getElementById('camera-image').style.display = 'none';
+                document.getElementById('error-container').style.display = 'block';
+                window.ReactNativeWebView.postMessage('error');
+                if (updateInterval) clearInterval(updateInterval);
+              }
+            }
+          }
+          
+          // Monitor iframe status
+          setInterval(function() {
+            if (!useFallbackMethod) {
+              try {
+                const iframe = document.getElementById('camera-iframe');
+                if (!iframe || !iframe.contentWindow) {
+                  tryFallbackMethod();
+                }
+              } catch (error) {
+                tryFallbackMethod();
+              }
+            }
+          }, 3000);
         </script>
       </body>
     </html>
   `;
+  };
 
   return (
     <TouchableOpacity 
@@ -196,7 +415,17 @@ export function CameraItemComponent({
           {loadError ? (
             <View style={styles.errorContainer}>
               <Camera size={48} color="#8E8E93" />
-              <Text style={styles.errorText}>Не удалось загрузить камеру</Text>
+              <Text style={styles.errorText}>Не удалось загрузить видео</Text>
+              <TouchableOpacity 
+                style={styles.retryButton}
+                onPress={() => {
+                  if (webViewRef.current) {
+                    webViewRef.current.reload();
+                  }
+                }}
+              >
+                <Text style={styles.retryButtonText}>Повторить попытку</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <WebView
@@ -206,13 +435,15 @@ export function CameraItemComponent({
               javaScriptEnabled={true}
               domStorageEnabled={true}
               startInLoadingState={true}
-              scalesPageToFit={true}
+              scalesPageToFit={false}
               scrollEnabled={false}
               bounces={false}
               allowsInlineMediaPlayback={true}
               mediaPlaybackRequiresUserAction={false}
               incognito={true}
               cacheEnabled={false}
+              originWhitelist={['*']}
+              mixedContentMode="always"
               onMessage={handleWebViewMessage}
               renderLoading={() => (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>

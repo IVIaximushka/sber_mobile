@@ -145,6 +145,18 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: PRIMARY_COLOR,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
   chevron: {
     transform: [{ rotate: '0deg' }],
     marginLeft: 8,
