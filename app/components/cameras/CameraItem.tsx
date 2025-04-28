@@ -26,6 +26,7 @@ export function CameraItemComponent({
   onLoadEnd
 }: CameraItemProps) {
   const [loadError, setLoadError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const webViewRef = useRef<WebView>(null);
   const retryTimeoutRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
@@ -35,15 +36,14 @@ export function CameraItemComponent({
     try {
       const { data } = event.nativeEvent;
       if (data === 'error') {
-        console.error(`Camera ${camera.id} (${camera.title}) failed to load: WebView reported error`);
+        setErrorMessage(`Ошибка подключения к камере\nIP: ${camera.url.split('/')[2]}`);
         setLoadError(true);
         onLoadEnd(camera.id);
         
-        // Пробуем перезагрузить с экспоненциальной задержкой
         if (retryCountRef.current < MAX_RETRIES) {
           const delay = Math.pow(2, retryCountRef.current) * 1000;
           retryCountRef.current++;
-          console.log(`Retrying camera ${camera.id} (${camera.title}) in ${delay}ms (attempt ${retryCountRef.current}/${MAX_RETRIES})`);
+          setErrorMessage(`Попытка подключения к ${camera.url.split('/')[2]}\nПопытка ${retryCountRef.current}/${MAX_RETRIES}`);
           
           retryTimeoutRef.current = setTimeout(() => {
             if (webViewRef.current) {
@@ -52,7 +52,7 @@ export function CameraItemComponent({
           }, delay);
         }
       } else if (data === 'loaded') {
-        console.log(`Camera ${camera.id} (${camera.title}) loaded successfully`);
+        setErrorMessage('');
         setLoadError(false);
         retryCountRef.current = 0;
         onLoadEnd(camera.id);
@@ -61,9 +61,10 @@ export function CameraItemComponent({
         }
       }
     } catch (error) {
+      setErrorMessage(`Ошибка подключения к камере\nIP: ${camera.url.split('/')[2]}`);
       console.error('Error handling WebView message:', error);
     }
-  }, [camera.id, camera.title, onLoadEnd]);
+  }, [camera.id, camera.url, onLoadEnd]);
 
   // Очищаем таймер при размонтировании
   useEffect(() => {
@@ -422,17 +423,7 @@ export function CameraItemComponent({
           {loadError ? (
             <View style={styles.errorContainer}>
               <Camera size={48} color="#8E8E93" />
-              <Text style={styles.errorText}>Не удалось загрузить видео</Text>
-              <TouchableOpacity 
-                style={styles.retryButton}
-                onPress={() => {
-                  if (webViewRef.current) {
-                    webViewRef.current.reload();
-                  }
-                }}
-              >
-                <Text style={styles.retryButtonText}>Повторить попытку</Text>
-              </TouchableOpacity>
+              <Text style={styles.errorText}>{errorMessage || 'Не удалось загрузить видео'}</Text>
             </View>
           ) : (
             <WebView
@@ -452,6 +443,7 @@ export function CameraItemComponent({
               originWhitelist={['*']}
               mixedContentMode="always"
               onMessage={handleWebViewMessage}
+              userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
               renderLoading={() => (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
                   <ActivityIndicator size="large" color="#fff" />
@@ -459,19 +451,22 @@ export function CameraItemComponent({
               )}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.error(`WebView error for camera ${camera.id} (${camera.title}):`, nativeEvent);
+                setErrorMessage(`Ошибка подключения к камере\nIP: ${camera.url.split('/')[2]}\nКод ошибки: ${nativeEvent.description || 'Неизвестно'}`);
                 setLoadError(true);
                 onLoadEnd(camera.id);
               }}
               onLoadStart={() => {
-                console.log(`Starting to load camera ${camera.id} (${camera.title})`);
+                setErrorMessage(`Подключение к камере\nIP: ${camera.url.split('/')[2]}`);
               }}
               onLoadEnd={() => {
-                console.log(`Finished loading camera ${camera.id} (${camera.title})`);
+                if (!loadError) {
+                  setErrorMessage('');
+                }
               }}
               onHttpError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.error(`HTTP error for camera ${camera.id} (${camera.title}):`, nativeEvent);
+                setErrorMessage(`Ошибка сети\nIP: ${camera.url.split('/')[2]}\nКод ошибки: ${nativeEvent.statusCode || 'Неизвестно'}`);
+                setLoadError(true);
               }}
             />
           )}

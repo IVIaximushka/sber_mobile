@@ -138,12 +138,15 @@ export const styles = StyleSheet.create({
     backgroundColor: '#000',
     zIndex: 1,
     borderRadius: 12,
+    padding: 20,
   },
   errorText: {
-    color: '#8E8E93',
+    color: '#FFFFFF',
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
+    lineHeight: 24,
+    fontWeight: '500',
   },
   retryButton: {
     marginTop: 16,
