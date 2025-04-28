@@ -35,6 +35,7 @@ export function CameraItemComponent({
     try {
       const { data } = event.nativeEvent;
       if (data === 'error') {
+        console.error(`Camera ${camera.id} (${camera.title}) failed to load: WebView reported error`);
         setLoadError(true);
         onLoadEnd(camera.id);
         
@@ -42,6 +43,7 @@ export function CameraItemComponent({
         if (retryCountRef.current < MAX_RETRIES) {
           const delay = Math.pow(2, retryCountRef.current) * 1000;
           retryCountRef.current++;
+          console.log(`Retrying camera ${camera.id} (${camera.title}) in ${delay}ms (attempt ${retryCountRef.current}/${MAX_RETRIES})`);
           
           retryTimeoutRef.current = setTimeout(() => {
             if (webViewRef.current) {
@@ -50,6 +52,7 @@ export function CameraItemComponent({
           }, delay);
         }
       } else if (data === 'loaded') {
+        console.log(`Camera ${camera.id} (${camera.title}) loaded successfully`);
         setLoadError(false);
         retryCountRef.current = 0;
         onLoadEnd(camera.id);
@@ -60,7 +63,7 @@ export function CameraItemComponent({
     } catch (error) {
       console.error('Error handling WebView message:', error);
     }
-  }, [camera.id, onLoadEnd]);
+  }, [camera.id, camera.title, onLoadEnd]);
 
   // Очищаем таймер при размонтировании
   useEffect(() => {
@@ -136,7 +139,7 @@ export function CameraItemComponent({
             <div class="video-container">
               <img 
                 id="camera-img" 
-                src="${url}?cacheBuster=${Date.now()}"
+                src="${url}"
                 onerror="handleError()"
               />
               <div class="overlay"></div>
@@ -151,6 +154,7 @@ export function CameraItemComponent({
               
               function handleError() {
                 errorCount++;
+                console.error('Image load error:', errorCount);
                 if (errorCount > MAX_ERRORS) {
                   document.getElementById('camera-img').style.display = 'none';
                   document.getElementById('error-container').style.display = 'block';
@@ -163,11 +167,14 @@ export function CameraItemComponent({
               
               function reloadImage() {
                 const img = document.getElementById('camera-img');
-                img.src = "${url}?cacheBuster=" + Date.now();
+                const timestamp = Date.now();
+                console.log('Reloading image with timestamp:', timestamp);
+                img.src = "${url}?cacheBuster=" + timestamp;
               }
               
               // Successfully loaded
               document.getElementById('camera-img').onload = function() {
+                console.log('Image loaded successfully');
                 document.getElementById('camera-img').style.display = 'block';
                 document.getElementById('error-container').style.display = 'none';
                 window.ReactNativeWebView.postMessage('loaded');
@@ -452,9 +459,19 @@ export function CameraItemComponent({
               )}
               onError={(syntheticEvent) => {
                 const { nativeEvent } = syntheticEvent;
-                console.warn('WebView error: ', nativeEvent);
+                console.error(`WebView error for camera ${camera.id} (${camera.title}):`, nativeEvent);
                 setLoadError(true);
                 onLoadEnd(camera.id);
+              }}
+              onLoadStart={() => {
+                console.log(`Starting to load camera ${camera.id} (${camera.title})`);
+              }}
+              onLoadEnd={() => {
+                console.log(`Finished loading camera ${camera.id} (${camera.title})`);
+              }}
+              onHttpError={(syntheticEvent) => {
+                const { nativeEvent } = syntheticEvent;
+                console.error(`HTTP error for camera ${camera.id} (${camera.title}):`, nativeEvent);
               }}
             />
           )}
