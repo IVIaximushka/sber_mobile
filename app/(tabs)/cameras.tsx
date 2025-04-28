@@ -11,37 +11,40 @@ import { styles } from '../components/cameras/CameraStyles';
 import { defaultCameras } from '../components/cameras/CameraData';
 
 export default function CamerasScreen() {
-  const [loading, setLoading] = useState(true);
-  const [selectedCamera, setSelectedCamera] = useState<number | null>(null);
+  const [loading, setLoading] = useState<Record<number, boolean>>({});
+  const [selectedCameras, setSelectedCameras] = useState<number[]>([]);
   const [recordingCameras, setRecordingCameras] = useState<number[]>([]);
   const [cameras, setCameras] = useState(defaultCameras);
 
   const handleCameraPress = (cameraId: number) => {
-    if (selectedCamera === cameraId) {
-      setSelectedCamera(null);
-      setLoading(false);
-    } else {
-      setSelectedCamera(cameraId);
-      setLoading(true);
+    setSelectedCameras(prev => {
+      if (prev.includes(cameraId)) {
+        // Если камера уже выбрана, убираем её из списка
+        return prev.filter(id => id !== cameraId);
+      } else {
+        // Если камера не выбрана, добавляем её в список
+        return [...prev, cameraId];
+      }
+    });
+    
+    // Устанавливаем состояние загрузки для новой камеры
+    if (!selectedCameras.includes(cameraId)) {
+      setLoading(prev => ({ ...prev, [cameraId]: true }));
     }
   };
 
   const handleRecordPress = (cameraId: number) => {
     setRecordingCameras(prev => {
       if (prev.includes(cameraId)) {
-        // Останавливаем запись
         return prev.filter(id => id !== cameraId);
       } else {
-        // Начинаем запись
         return [...prev, cameraId];
       }
     });
   };
 
   const handleLoadEnd = (cameraId: number) => {
-    if (selectedCamera === cameraId) {
-      setLoading(false);
-    }
+    setLoading(prev => ({ ...prev, [cameraId]: false }));
   };
 
   return (
@@ -52,9 +55,9 @@ export default function CamerasScreen() {
         <CameraItemComponent
           key={camera.id}
           camera={camera}
-          isSelected={selectedCamera === camera.id}
+          isSelected={selectedCameras.includes(camera.id)}
           isRecording={recordingCameras.includes(camera.id)}
-          loading={loading && selectedCamera === camera.id}
+          loading={loading[camera.id] || false}
           onCameraPress={handleCameraPress}
           onRecordPress={handleRecordPress}
           onLoadEnd={handleLoadEnd}

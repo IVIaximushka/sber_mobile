@@ -419,7 +419,6 @@ export function CameraItemComponent({
 
       {isSelected && (
         <View style={styles.cameraWrapper}>
-          {loading && <ActivityIndicator size="large" color="#8E8E93" style={styles.loader} />}
           {loadError ? (
             <View style={styles.errorContainer}>
               <Camera size={48} color="#8E8E93" />
@@ -445,7 +444,7 @@ export function CameraItemComponent({
               onMessage={handleWebViewMessage}
               userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
               renderLoading={() => (
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+                <View style={styles.loader}>
                   <ActivityIndicator size="large" color="#fff" />
                 </View>
               )}
