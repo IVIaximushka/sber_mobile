@@ -65,8 +65,8 @@ export default function ProposalsScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}>
+            style={styles.backButton}
+            onPress={() => router.back()}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Предложения жильцов</Text>
