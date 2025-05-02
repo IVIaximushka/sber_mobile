@@ -5,7 +5,11 @@ import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
-export default function AIAssistantScreen() {
+interface AIAssistantScreenProps {
+  onBackPress: () => void;
+}
+
+export default function AIAssistantScreen({ onBackPress }: AIAssistantScreenProps) {
   const router = useRouter();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
@@ -46,7 +50,7 @@ export default function AIAssistantScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={onBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerContent}>

@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { ChevronLeft, Send, User } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
@@ -42,11 +42,15 @@ const chatData = {
   },
 };
 
-export default function ChatScreen() {
+interface ChatScreenProps {
+  chatId: string;
+  onBackPress: () => void;
+}
+
+export default function ChatScreen({ chatId, onBackPress }: ChatScreenProps) {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(chatData[id as keyof typeof chatData]?.messages || []);
+  const [messages, setMessages] = useState(chatData[chatId as keyof typeof chatData]?.messages || []);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -77,12 +81,12 @@ export default function ChatScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={onBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <User size={24} color="#FFFFFF" />
-          <Text style={styles.headerTitle}>{chatData[id as keyof typeof chatData]?.title || 'Чат'}</Text>
+          <Text style={styles.headerTitle}>{chatData[chatId as keyof typeof chatData]?.title || 'Чат'}</Text>
         </View>
       </View>
 

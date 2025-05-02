@@ -1,15 +1,80 @@
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Search, MessageCircle, HelpCircle, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import AIAssistantScreen from '@/app/components/chat/ai-assistant';
+import ChatScreen from '@/app/components/chat/[id]';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
-export default function ChatScreen() {
+// Типы для чатов
+interface ChatItem {
+  id: string;
+  title: string;
+  lastMessage: string;
+  time: string;
+  unread: number;
+  isAI?: boolean;
+  icon: React.ComponentType<any>;
+}
+
+// Список чатов - компонент
+const ChatList = ({ chats, onChatPress }: { chats: ChatItem[], onChatPress: (id: string) => void }) => {
+  return (
+    <ScrollView style={styles.messagesContainer}>
+      {chats.map((chat) => (
+        <TouchableOpacity 
+          key={chat.id} 
+          style={styles.chatItem}
+          onPress={() => onChatPress(chat.id)}
+        >
+          <View style={[styles.chatIconContainer, { backgroundColor: chat.isAI ? `${PRIMARY_COLOR}20` : PRIMARY_COLOR }]}>
+            <chat.icon size={24} color={chat.isAI ? PRIMARY_COLOR : '#FFFFFF'} />
+          </View>
+          <View style={styles.chatContent}>
+            <View style={styles.chatHeader}>
+              <Text style={styles.chatTitle}>{chat.title}</Text>
+              <Text style={styles.chatTime}>{chat.time}</Text>
+            </View>
+            <Text style={styles.chatMessage} numberOfLines={1}>
+              {chat.lastMessage}
+            </Text>
+          </View>
+          {chat.unread > 0 && (
+            <View style={styles.unreadBadge}>
+              <Text style={styles.unreadText}>{chat.unread}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+};
+
+// Компонент поиска
+const SearchBar = ({ value, onChangeText }: { value: string, onChangeText: (text: string) => void }) => {
+  return (
+    <View style={styles.searchContainer}>
+      <View style={styles.searchInputContainer}>
+        <Search size={20} color={PRIMARY_COLOR} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Поиск чатов"
+          placeholderTextColor="#8E8E93"
+          value={value}
+          onChangeText={onChangeText}
+        />
+      </View>
+    </View>
+  );
+};
+
+export default function MainChatScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeChat, setActiveChat] = useState<string | null>(null);
 
-  const chats = [
+  const chats: ChatItem[] = [
     {
       id: '1',
       title: 'Помощник',
@@ -42,58 +107,28 @@ export default function ChatScreen() {
   );
 
   const handleChatPress = (chatId: string) => {
-    if (chatId === '1') {
-      router.push('/components/chat/ai-assistant');
-    } else {
-      router.push({
-        pathname: '/components/chat/[id]',
-        params: { id: chatId }
-      });
-    }
+    setActiveChat(chatId);
   };
 
+  const handleBackFromChat = () => {
+    setActiveChat(null);
+  };
+
+  // Показывать чат с ассистентом, если это выбрано
+  if (activeChat === '1') {
+    return <AIAssistantScreen onBackPress={handleBackFromChat} />;
+  }
+
+  // Показывать выбранный чат
+  if (activeChat) {
+    return <ChatScreen chatId={activeChat} onBackPress={handleBackFromChat} />;
+  }
+
+  // Главный экран со списком чатов
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Search size={20} color={PRIMARY_COLOR} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Поиск чатов"
-            placeholderTextColor="#8E8E93"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-      </View>
-
-      <ScrollView style={styles.messagesContainer}>
-        {filteredChats.map((chat) => (
-          <TouchableOpacity 
-            key={chat.id} 
-            style={styles.chatItem}
-            onPress={() => handleChatPress(chat.id)}
-          >
-            <View style={[styles.chatIconContainer, { backgroundColor: chat.isAI ? `${PRIMARY_COLOR}20` : PRIMARY_COLOR }]}>
-              <chat.icon size={24} color={chat.isAI ? PRIMARY_COLOR : '#FFFFFF'} />
-            </View>
-            <View style={styles.chatContent}>
-              <View style={styles.chatHeader}>
-                <Text style={styles.chatTitle}>{chat.title}</Text>
-                <Text style={styles.chatTime}>{chat.time}</Text>
-              </View>
-              <Text style={styles.chatMessage} numberOfLines={1}>
-                {chat.lastMessage}
-              </Text>
-            </View>
-            {chat.unread > 0 && (
-              <View style={styles.unreadBadge}>
-                <Text style={styles.unreadText}>{chat.unread}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
+      <ChatList chats={filteredChats} onChatPress={handleChatPress} />
     </View>
   );
 }
