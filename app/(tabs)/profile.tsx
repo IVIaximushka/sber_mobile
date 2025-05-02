@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../lib/authContext';
-import { supabase } from '../../lib/supabase';
+import { useAuth } from '@/lib/authContext';
+import { supabase } from '@/lib/supabase';
 
 // Импорт компонентов профиля
-import { ProfileHeader } from '../components/profile/ProfileHeader';
-import { ContactInfo } from '../components/profile/ContactInfo';
-import { SettingsMenu } from '../components/profile/SettingsMenu';
-import { LogoutButton } from '../components/profile/LogoutButton';
+import { ProfileHeader } from '@/app/components/profile/ProfileHeader';
+import { ContactInfo } from '@/app/components/profile/ContactInfo';
+import { SettingsMenu } from '@/app/components/profile/SettingsMenu';
+import { LogoutButton } from '@/app/components/profile/LogoutButton';
+import EditProfileScreen from '@/app/components/profile/edit';
 
 // Импорт данных и стилей
-import { styles } from '../components/profile/ProfileStyles';
-import { ProfileData, PRIMARY_COLOR } from '../components/profile/ProfileData';
+import { styles } from '@/app/components/profile/ProfileStyles';
+import { ProfileData, PRIMARY_COLOR } from '@/app/components/profile/ProfileData';
 
 export default function ProfileScreen() {
   const { state, getProfile } = useAuth();
@@ -20,6 +21,7 @@ export default function ProfileScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({});
   const [loading, setLoading] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -71,8 +73,29 @@ export default function ProfileScreen() {
   };
 
   const handleEditPress = () => {
-    router.push('/profile/edit');
+    setIsEditMode(true);
   };
+  
+  const handleBackFromEdit = () => {
+    setIsEditMode(false);
+    // После возврата из режима редактирования, обновляем данные профиля
+    loadProfile();
+  };
+  
+  async function loadProfile() {
+    try {
+      const profile = await getProfile();
+      if (profile) {
+        setProfileData({
+          username: profile.username,
+          phone: profile.phone,
+          apartment: profile.apartment
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка при загрузке профиля:', error);
+    }
+  }
 
   if (loading) {
     return (
@@ -80,6 +103,11 @@ export default function ProfileScreen() {
         <ActivityIndicator size="large" color={PRIMARY_COLOR} />
       </View>
     );
+  }
+  
+  // Рендерим экран редактирования, если активен режим редактирования
+  if (isEditMode) {
+    return <EditProfileScreen onBackPress={handleBackFromEdit} />;
   }
 
   return (

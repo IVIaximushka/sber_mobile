@@ -8,7 +8,7 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { Link, useRouter } from 'expo-router';
 
 interface Props {

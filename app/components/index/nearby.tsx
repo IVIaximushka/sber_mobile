@@ -19,6 +19,10 @@ interface Place {
   image: any;
 }
 
+interface NearbyScreenProps {
+  onBackPress?: () => void;
+}
+
 // Имитация базы данных мест
 const nearbyPlaces: Place[] = [
   {
@@ -30,7 +34,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 10',
     discount: '10%',
     promotion: 'Покупки со скидкой',
-    image: require('../assets/images/magnit.jpg'),
+    image: require('../../../assets/images/magnit.jpg'),
   },
   {
     id: '2',
@@ -41,7 +45,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 15',
     discount: '15%',
     promotion: 'Акция на второе блюдо',
-    image: require('../assets/images/sushi.jpg'),
+    image: require('../../../assets/images/sushi.jpg'),
   },
   {
     id: '3',
@@ -52,7 +56,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 20',
     discount: '20%',
     promotion: 'Первое посещение бесплатно',
-    image: require('../assets/images/gym.jpg'),
+    image: require('../../../assets/images/gym.jpg'),
   },
   {
     id: '4',
@@ -63,7 +67,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 25',
     discount: '25%',
     promotion: 'Скидка на стрижку',
-    image: require('../assets/images/salon.jpg'),
+    image: require('../../../assets/images/salon.jpg'),
   },
   {
     id: '5',
@@ -74,7 +78,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 30',
     discount: '5%',
     promotion: 'Скидка на витамины',
-    image: require('../assets/images/pharmacy.jpg'),
+    image: require('../../../assets/images/pharmacy.jpg'),
   },
   {
     id: '6',
@@ -85,7 +89,7 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 35',
     discount: '45%',
     promotion: 'Скидка на первый заказ',
-    image: require('../assets/images/rest.jpg'),
+    image: require('../../../assets/images/rest.jpg'),
   },
   {
     id: '7',
@@ -96,11 +100,12 @@ const nearbyPlaces: Place[] = [
     address: 'ул. Ленина, 15',
     discount: '10%',
     promotion: 'Скидка на всю продукцию',
-    image: require('../assets/images/pyaterochka.jpg'),
+    image: require('../../../assets/images/pyaterochka.jpg'),
   },
 ];
 
-export default function NearbyScreen() {
+// Создаем именованный компонент
+function Nearby({ onBackPress }: NearbyScreenProps) {
   const router = useRouter();
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [showQRCode, setShowQRCode] = useState(false);
@@ -113,6 +118,14 @@ export default function NearbyScreen() {
   const handleCloseQRCode = () => {
     setShowQRCode(false);
   };
+  
+  const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <LinearGradient
@@ -121,7 +134,7 @@ export default function NearbyScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={handleBack}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Рядом с домом</Text>
@@ -249,35 +262,41 @@ const styles = StyleSheet.create({
   placeAddress: {
     fontSize: 14,
     color: '#8E8E93',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   discountContainer: {
     backgroundColor: `${PRIMARY_COLOR}10`,
-    padding: 8,
     borderRadius: 8,
+    padding: 8,
   },
   discountText: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: PRIMARY_COLOR,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   promotionText: {
     fontSize: 12,
-    color: '#1A1A1A',
+    color: '#666666',
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
   modalContent: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 24,
-    width: '80%',
+    padding: 20,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    width: '100%',
   },
   modalTitle: {
     fontSize: 20,
@@ -288,40 +307,44 @@ const styles = StyleSheet.create({
   modalSubtitle: {
     fontSize: 16,
     color: '#8E8E93',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   qrCodeContainer: {
-    width: 200,
-    height: 200,
+    padding: 20,
     backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
     borderRadius: 8,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   qrCodeText: {
     fontSize: 18,
     fontWeight: '600',
     color: PRIMARY_COLOR,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   qrCodeDescription: {
     fontSize: 14,
     color: '#8E8E93',
+    marginBottom: 20,
     textAlign: 'center',
-    marginBottom: 24,
   },
   closeButton: {
     backgroundColor: PRIMARY_COLOR,
-    paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
   },
   closeButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
-}); 
+});
+
+// Экспортируем компонент обоими способами
+export { Nearby };
+export default Nearby; 

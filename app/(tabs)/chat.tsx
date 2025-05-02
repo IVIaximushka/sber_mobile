@@ -43,9 +43,12 @@ export default function ChatScreen() {
 
   const handleChatPress = (chatId: string) => {
     if (chatId === '1') {
-      router.push('/ai-assistant');
+      router.push('/components/chat/ai-assistant');
     } else {
-      router.push(`/chat/${chatId}`);
+      router.push({
+        pathname: '/components/chat/[id]',
+        params: { id: chatId }
+      });
     }
   };
 

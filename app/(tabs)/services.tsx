@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView } from 'react-native';
 
 // Импорт данных и стилей
-import { styles } from '../components/services/ServiceStyles';
+import { styles } from '@/app/components/services/ServiceStyles';
 import { 
   paymentServices, 
   additionalServices,
@@ -11,11 +11,11 @@ import {
 } from '../components/services/ServiceData';
 
 // Импорт компонентов
-import { PaymentServiceCard } from '../components/services/PaymentServiceCard';
-import { PaymentServiceDetails } from '../components/services/PaymentServiceDetails';
-import { SearchBar } from '../components/services/SearchBar';
-import { SearchResults } from '../components/services/SearchResults';
-import { AdditionalServiceDetails } from '../components/services/AdditionalServiceDetails';
+import { PaymentServiceCard } from '@/app/components/services/PaymentServiceCard';
+import { PaymentServiceDetails } from '@/app/components/services/PaymentServiceDetails';
+import { SearchBar } from '@/app/components/services/SearchBar';
+import { SearchResults } from '@/app/components/services/SearchResults';
+import { AdditionalServiceDetails } from '@/app/components/services/AdditionalServiceDetails';
 
 export default function ServicesScreen() {
   const [selectedService, setSelectedService] = useState<string | null>(null);

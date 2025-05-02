@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { useAuth } from '../../lib/authContext';
+import { useAuth } from '@/lib/authContext';
 import { Link } from 'expo-router';
 
 export default function ResetPasswordScreen() {
