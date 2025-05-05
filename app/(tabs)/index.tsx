@@ -2,7 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Image
 import { Bell, ChevronRight, Calendar, Clock, MapPin, Users, Store, Utensils, Dumbbell, Scissors, ChevronLeft, AlertTriangle, Droplet, Zap, Flame, Home, Building2, Percent, ThumbsUp, ThumbsDown, Heart } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../lib/authContext';
+import { useAuth } from '@/lib/authContext';
+
+// Импорт компонентов для навигации
+import NearbyScreen from '@/app/components/index/nearby';
+import ProposalsScreen from '@/app/components/index/proposals';
+import NotificationsScreen from '@/app/components/index/notifications';
 
 const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
@@ -14,7 +19,7 @@ const nearbyServices = [
     type: 'store',
     distance: '0.2 км',
     address: 'ул. Ленина, 10',
-    image: require('../../assets/images/magnit.jpg'),
+    image: require('@/assets/images/magnit.jpg'),
   },
   {
     id: '2',
@@ -22,7 +27,7 @@ const nearbyServices = [
     type: 'store',
     distance: '0.3 км',
     address: 'ул. Ленина, 15',
-    image: require('../../assets/images/pyaterochka.jpg'),
+    image: require('@/assets/images/pyaterochka.jpg'),
   },
   {
     id: '3',
@@ -30,7 +35,7 @@ const nearbyServices = [
     type: 'restaurant',
     distance: '0.5 км',
     address: 'ул. Ленина, 20',
-    image: require('../../assets/images/sushi.jpg'),
+    image: require('@/assets/images/sushi.jpg'),
   },
   {
     id: '4',
@@ -38,7 +43,7 @@ const nearbyServices = [
     type: 'beauty',
     distance: '0.4 км',
     address: 'ул. Ленина, 25',
-    image: require('../../assets/images/salon.jpg'),
+    image: require('@/assets/images/salon.jpg'),
   },
 ];
 
@@ -52,7 +57,7 @@ const residentProposals = [
     votesFor: 45,
     votesAgainst: 12,
     status: 'active',
-    image: require('../../assets/images/playground.jpg'),
+    image: require('@/assets/images/playground.jpg'),
   },
   {
     id: '2',
@@ -63,7 +68,7 @@ const residentProposals = [
     votesFor: 38,
     votesAgainst: 15,
     status: 'active',
-    image: require('../../assets/images/bike.jpg'),
+    image: require('@/assets/images/bike.jpg'),
   },
   {
     id: '3',
@@ -74,7 +79,7 @@ const residentProposals = [
     votesFor: 52,
     votesAgainst: 8,
     status: 'active',
-    image: require('../../assets/images/cleaning.jpg'),
+    image: require('@/assets/images/cleaning.jpg'),
   },
 ];
 
@@ -85,7 +90,7 @@ const fundraisingCampaigns = [
     description: 'Сбор средств на ремонт и модернизацию системы домофона',
     targetAmount: 50000,
     currentAmount: 35000,
-    image: require('../../assets/images/intercom.jpg'),
+    image: require('@/assets/images/intercom.jpg'),
   },
   {
     id: '2',
@@ -93,7 +98,7 @@ const fundraisingCampaigns = [
     description: 'Сбор средств на установку системы видеонаблюдения в подъезде',
     targetAmount: 100000,
     currentAmount: 45000,
-    image: require('../../assets/images/camera.jpg'),
+    image: require('@/assets/images/camera.jpg'),
   },
   {
     id: '3',
@@ -101,9 +106,11 @@ const fundraisingCampaigns = [
     description: 'Сбор средств на установку новых скамеек и урн во дворе',
     targetAmount: 75000,
     currentAmount: 60000,
-    image: require('../../assets/images/yard.jpg'),
+    image: require('@/assets/images/yard.jpg'),
   },
 ];
+
+type ScreenType = 'home' | 'nearby' | 'proposals' | 'notifications';
 
 type Styles = {
   container: ViewStyle;
@@ -224,6 +231,7 @@ export default function HomeScreen() {
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
   const [profileData, setProfileData] = useState<{username?: string}>({});
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('home');
 
   useEffect(() => {
     async function loadProfile() {
@@ -285,6 +293,21 @@ export default function HomeScreen() {
     },
   ];
 
+  const handleNavigateToNearby = () => {
+    setCurrentScreen('nearby');
+  };
+
+  const handleNavigateToProposals = () => {
+    setCurrentScreen('proposals');
+  };
+
+  const handleNavigateToNotifications = () => {
+    setCurrentScreen('notifications');
+  };
+
+  const handleBackToHome = () => {
+    setCurrentScreen('home');
+  };
 
   const renderSection = (title: string, items: any[], icon: any, onPress: () => void) => (
     <View style={styles.section}>
@@ -337,6 +360,19 @@ export default function HomeScreen() {
     setSelectedProposal(null);
   };
 
+  // Рендерим разные экраны в зависимости от текущего состояния
+  if (currentScreen === 'nearby') {
+    return <NearbyScreen onBackPress={handleBackToHome} />;
+  }
+
+  if (currentScreen === 'proposals') {
+    return <ProposalsScreen onBackPress={handleBackToHome} />;
+  }
+
+  if (currentScreen === 'notifications') {
+    return <NotificationsScreen onBackPress={handleBackToHome} />;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <ImageBackground
@@ -356,7 +392,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity 
               style={styles.notificationButton}
-              onPress={() => router.push('/notifications')}>
+              onPress={handleNavigateToNotifications}>
               <Bell size={24} color="#FFFFFF" />
               <View style={[styles.notificationBadge, { backgroundColor: '#FF3B30' }]}>
                 <Text style={styles.notificationText}>3</Text>
@@ -403,7 +439,7 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Акции и скидки</Text>
           <TouchableOpacity 
             style={styles.viewAllButton}
-            onPress={() => router.push('/nearby')}>
+            onPress={handleNavigateToNearby}>
             <Text style={styles.viewAllText}>Посмотреть</Text>
             <ChevronRight size={20} color="#FFFFFF" />
           </TouchableOpacity>
@@ -418,7 +454,7 @@ export default function HomeScreen() {
             <TouchableOpacity 
               key={service.id} 
               style={styles.serviceCard}
-              onPress={() => router.push('/nearby')}>
+              onPress={handleNavigateToNearby}>
               <Image source={service.image} style={styles.serviceImage} />
               <View style={styles.serviceContent}>
                 <Text style={styles.serviceTitle}>{service.title}</Text>
@@ -491,7 +527,7 @@ export default function HomeScreen() {
           </View>
           <TouchableOpacity 
             style={styles.seeAllButton}
-            onPress={() => router.push('/proposals')}>
+            onPress={handleNavigateToProposals}>
             <ChevronRight size={20} color={PRIMARY_COLOR} />
           </TouchableOpacity>
         </View>

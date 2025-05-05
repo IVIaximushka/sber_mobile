@@ -4,7 +4,7 @@ import { Slot, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { AuthProvider, useAuth } from '../lib/authContext';
+import { AuthProvider, useAuth } from '@/lib/authContext';
 
 function RootLayoutNav() {
   const { state } = useAuth();

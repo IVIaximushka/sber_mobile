@@ -5,6 +5,10 @@ import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
+interface ProposalsScreenProps {
+  onBackPress?: () => void;
+}
+
 const residentProposals = [
   {
     id: '1',
@@ -15,7 +19,7 @@ const residentProposals = [
     votesFor: 45,
     votesAgainst: 12,
     status: 'active',
-    image: require('../assets/images/playground.jpg'),
+    image: require('../../../assets/images/playground.jpg'),
   },
   {
     id: '2',
@@ -26,7 +30,7 @@ const residentProposals = [
     votesFor: 38,
     votesAgainst: 15,
     status: 'active',
-    image: require('../assets/images/bike.jpg'),
+    image: require('../../../assets/images/bike.jpg'),
   },
   {
     id: '3',
@@ -37,11 +41,11 @@ const residentProposals = [
     votesFor: 52,
     votesAgainst: 8,
     status: 'active',
-    image: require('../assets/images/cleaning.jpg'),
+    image: require('../../../assets/images/cleaning.jpg'),
   },
 ];
 
-export default function ProposalsScreen() {
+function Proposals({ onBackPress }: ProposalsScreenProps) {
   const router = useRouter();
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
@@ -60,13 +64,21 @@ export default function ProposalsScreen() {
   const closeModal = () => {
     setSelectedProposal(null);
   };
+  
+  const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity 
             style={styles.backButton}
-            onPress={() => router.back()}>
+            onPress={handleBack}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Предложения жильцов</Text>
@@ -409,4 +421,7 @@ const styles = StyleSheet.create({
   modalVoteButtonTextActive: {
     color: '#FFFFFF',
   },
-}); 
+});
+
+export { Proposals };
+export default Proposals; 

@@ -4,8 +4,21 @@ import { useRouter } from 'expo-router';
 
 const PRIMARY_COLOR = '#8B1E3F'; // бургунди цвет
 
-export default function NotificationsScreen() {
+interface NotificationsScreenProps {
+  onBackPress?: () => void;
+}
+
+// Создаем именованный компонент
+function Notifications({ onBackPress }: NotificationsScreenProps) {
   const router = useRouter();
+  
+  const handleBack = () => {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      router.back();
+    }
+  };
 
   const notifications = [
     {
@@ -33,7 +46,7 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={handleBack}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Уведомления</Text>
@@ -121,4 +134,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: PRIMARY_COLOR,
   },
-}); 
+});
+
+// Экспортируем компонент обоими способами
+export { Notifications };
+export default Notifications; 

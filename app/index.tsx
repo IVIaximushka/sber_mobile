@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../lib/authContext';
+import { useAuth } from '@/lib/authContext';
 
 export default function HomeScreen() {
   const { state } = useAuth();

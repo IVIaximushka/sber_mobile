@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, Image, ScrollView } from 'react-native';
-import { AuthForm } from '../components/auth/AuthForm';
-import { AuthSwitcher } from '../components/auth/AuthSwitcher';
-import { SocialAuth } from '../components/auth/SocialAuth';
+import { AuthForm } from '@/app/components/auth/AuthForm';
+import { AuthSwitcher } from '@/app/components/auth/AuthSwitcher';
+import { SocialAuth } from '@/app/components/auth/SocialAuth';
 
 export default function SignInScreen() {
   return (

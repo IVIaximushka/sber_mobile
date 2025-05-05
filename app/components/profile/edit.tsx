@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
-import { useAuth } from '../../lib/authContext';
+import { useAuth } from '@/lib/authContext';
 import { useRouter } from 'expo-router';
 import { Link } from 'expo-router';
 
@@ -25,7 +25,11 @@ interface ProfileData {
   updated_at?: string;
 }
 
-export default function EditProfileScreen() {
+interface EditProfileScreenProps {
+  onBackPress?: () => void;
+}
+
+export default function EditProfileScreen({ onBackPress }: EditProfileScreenProps) {
   const { state, updateProfile, getProfile } = useAuth();
   const [username, setUsername] = useState('');
   const [phone, setPhone] = useState('');
@@ -62,11 +66,23 @@ export default function EditProfileScreen() {
         apartment
       });
       Alert.alert('Успех', 'Профиль успешно обновлен');
-      router.replace('/(tabs)/profile');
+      if (onBackPress) {
+        onBackPress();
+      } else {
+        router.replace('/(tabs)/profile');
+      }
     } catch (error) {
       Alert.alert('Ошибка', (error as Error).message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      router.back();
     }
   };
 
@@ -92,7 +108,7 @@ export default function EditProfileScreen() {
               source={
                 state.user?.user_metadata?.avatar_url
                   ? { uri: state.user.user_metadata.avatar_url }
-                  : require('../../assets/images/icon.png')
+                  : require('@/assets/images/icon.png')
               }
               style={styles.avatar}
             />
@@ -134,7 +150,7 @@ export default function EditProfileScreen() {
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
               style={[styles.button, styles.cancelButton]} 
-              onPress={() => router.back()}
+              onPress={handleCancel}
             >
               <Text style={styles.buttonText}>Отмена</Text>
             </TouchableOpacity>

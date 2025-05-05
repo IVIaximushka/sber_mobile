@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
 
 // Импорт компонентов
-import { CameraHeader } from '../components/cameras/CameraHeader';
-import { CameraItemComponent } from '../components/cameras/CameraItem';
-import { CameraFooter } from '../components/cameras/CameraFooter';
+import { CameraHeader } from '@/app/components/cameras/CameraHeader';
+import { CameraItemComponent } from '@/app/components/cameras/CameraItem';
+import { CameraFooter } from '@/app/components/cameras/CameraFooter';
 
 // Импорт стилей и данных
-import { styles } from '../components/cameras/CameraStyles';
-import { defaultCameras } from '../components/cameras/CameraData';
+import { styles } from '@/app/components/cameras/CameraStyles';
+import { defaultCameras } from '@/app/components/cameras/CameraData';
 
 export default function CamerasScreen() {
   const [loading, setLoading] = useState<Record<number, boolean>>({});

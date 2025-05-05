@@ -1,52 +1,25 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { ChevronLeft, Send, User } from 'lucide-react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { ChevronLeft, Send, HelpCircle } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
 const PRIMARY_COLOR = '#8B1E3F';
 
-// Имитация базы данных чатов
-const chatData = {
-  '1': {
-    title: 'Управляющая компания',
-    messages: [
-      {
-        id: '1',
-        text: 'Добрый день! Чем могу помочь?',
-        isAI: true,
-        time: '10:00',
-      },
-    ],
-  },
-  '2': {
-    title: 'Техподдержка',
-    messages: [
-      {
-        id: '1',
-        text: 'Здравствуйте! Как я могу вам помочь?',
-        isAI: true,
-        time: '09:30',
-      },
-    ],
-  },
-  '3': {
-    title: 'Соседи',
-    messages: [
-      {
-        id: '1',
-        text: 'Привет всем! Кто-нибудь знает, когда будет уборка подъезда?',
-        isAI: false,
-        time: '11:15',
-      },
-    ],
-  },
-};
+interface AIAssistantScreenProps {
+  onBackPress: () => void;
+}
 
-export default function ChatScreen() {
+export default function AIAssistantScreen({ onBackPress }: AIAssistantScreenProps) {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState(chatData[id as keyof typeof chatData]?.messages || []);
+  const [messages, setMessages] = useState([
+    {
+      id: '1',
+      text: 'Здравствуйте! Я ваш виртуальный помощник. Чем я могу вам помочь сегодня?',
+      isAI: true,
+      time: '10:00',
+    },
+  ]);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -59,15 +32,15 @@ export default function ChatScreen() {
       setMessages([...messages, newMessage]);
       setMessage('');
 
-      // Имитация ответа
+      // Имитация ответа ИИ
       setTimeout(() => {
-        const response = {
+        const aiResponse = {
           id: (Date.now() + 1).toString(),
-          text: 'Спасибо за сообщение! Мы обязательно рассмотрим ваш вопрос.',
+          text: 'Я получил ваше сообщение. Чем еще могу помочь?',
           isAI: true,
           time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
         };
-        setMessages(prev => [...prev, response]);
+        setMessages(prev => [...prev, aiResponse]);
       }, 1000);
     }
   };
@@ -77,12 +50,12 @@ export default function ChatScreen() {
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => router.back()}>
+          onPress={onBackPress}>
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <User size={24} color="#FFFFFF" />
-          <Text style={styles.headerTitle}>{chatData[id as keyof typeof chatData]?.title || 'Чат'}</Text>
+          <HelpCircle size={24} color="#FFFFFF" />
+          <Text style={styles.headerTitle}>Помощник</Text>
         </View>
       </View>
 

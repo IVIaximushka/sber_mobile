@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../../lib/authContext';
+import { useAuth } from '@/lib/authContext';
 import { Animated } from 'react-native';
 
 export default function AuthSuccessScreen() {
