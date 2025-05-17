@@ -8,8 +8,8 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import { supabase } from '@/lib/supabase';
 import { Link, useRouter } from 'expo-router';
+import { useAuth } from '@/lib/authContext';
 
 interface Props {
   mode: 'signIn' | 'signUp';
@@ -20,6 +20,7 @@ const AuthForm: React.FC<Props> = ({ mode }) => {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async () => {
     if (email.trim() === '' || password.trim() === '') {
@@ -30,37 +31,12 @@ const AuthForm: React.FC<Props> = ({ mode }) => {
     setIsSubmitting(true);
     try {
       if (mode === 'signIn') {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        // После успешного входа явно перенаправляем на экран успешной авторизации
+        await signIn(email, password);
         router.push('/(auth)/auth-success');
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        Alert.alert(
-          'Регистрация успешна', 
-          'Ваш аккаунт успешно создан, выполняется вход в систему.'
-        );
-        
-        // После успешной регистрации выполняем вход
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (signInError) throw signInError;
-        
-        // После успешного входа явно перенаправляем на экран успешной авторизации
+        await signUp(email, password);
+        Alert.alert('Регистрация успешна', 'Ваш аккаунт успешно создан, выполняется вход в систему.');
+        await signIn(email, password);
         router.push('/(auth)/auth-success');
       }
     } catch (error) {
