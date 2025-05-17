@@ -1,16 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 
 const SocialAuth = () => {
   const handleGoogleSignIn = async () => {
     try {
       Alert.alert('Информация', 'Вход через Google временно не доступен');
-      // const { error } = await supabase.auth.signInWithOAuth({
-      //   provider: 'google',
-      // });
-      // if (error) throw error;
     } catch (error) {
       Alert.alert('Ошибка', (error as Error).message);
     }

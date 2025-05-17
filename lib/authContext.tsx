@@ -1,13 +1,14 @@
 // @ts-ignore
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { supabase } from './supabase';
-import { Session, User } from '@supabase/supabase-js';
+import React, { createContext, useState, useContext } from 'react';
+import axios from 'axios';
 import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ReactNode } from 'react';
+
+import { User } from './types';
 
 interface AuthState {
   user: User | null;
-  session: Session | null;
+  session: any | null;
   loading: boolean;
 }
 
@@ -33,8 +34,7 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-// Ключ для хранения профиля в AsyncStorage
-const PROFILE_STORAGE_KEY = 'user_profile';
+const API_URL = 'https://dev.bro-js.ru/ms/kfu-m-24-1/sber_mobile/auth';
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -44,211 +44,73 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
-  children 
-}: { 
-  children: React.ReactNode 
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({
     user: null,
     session: null,
-    loading: true,
+    loading: false,
   });
 
-  useEffect(() => {
-    // Получить текущую сессию при загрузке
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setState(prev => ({ 
-        ...prev, 
-        session,
-        user: session?.user || null,
-        loading: false,
-      }));
-
-      // При входе пользователя загружаем его профиль из локального хранилища
-      if (session?.user) {
-        loadLocalProfile(session.user.id);
-      }
-    });
-
-    // Установить слушатель изменений состояния аутентификации
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setState(prev => ({ 
-          ...prev, 
-          session,
-          user: session?.user || null,
-          loading: false,
-        }));
-
-        // При изменении состояния аутентификации
-        if (event === 'SIGNED_IN' && session?.user) {
-          loadLocalProfile(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          // При выходе очищаем локальный профиль
-          clearLocalProfile();
-        }
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  // Загрузка профиля из локального хранилища
-  const loadLocalProfile = async (userId: string) => {
-    try {
-      const profileJson = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${userId}`);
-      
-      if (profileJson) {
-        console.log('Профиль загружен из локального хранилища');
-      } else {
-        // Если профиль не существует, создаем пустой
-        const newProfile: ProfileData = {
-          id: userId,
-          username: state.user?.email?.split('@')[0] || 'Пользователь',
-          updated_at: new Date().toISOString(),
-        };
-        
-        await AsyncStorage.setItem(`${PROFILE_STORAGE_KEY}_${userId}`, JSON.stringify(newProfile));
-        console.log('Создан новый локальный профиль');
-      }
-    } catch (error) {
-      console.error('Ошибка при загрузке локального профиля:', error);
-    }
-  };
-
-  // Очистка локального профиля при выходе
-  const clearLocalProfile = async () => {
-    try {
-      if (state.user?.id) {
-        await AsyncStorage.removeItem(`${PROFILE_STORAGE_KEY}_${state.user.id}`);
-        console.log('Локальный профиль очищен');
-      }
-    } catch (error) {
-      console.error('Ошибка при очистке локального профиля:', error);
-    }
-  };
-
+  // Методы авторизации через backend
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
+      const { data } = await axios.post(`${API_URL}/sign-in`, { email, password });
+      setState(prev => ({ ...prev, user: data.user, session: data.session }));
     } catch (error: any) {
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка входа');
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
+      const { data } = await axios.post(`${API_URL}/sign-up`, { email, password });
+      setState(prev => ({ ...prev, user: data.user, session: data.session }));
     } catch (error: any) {
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка регистрации');
     }
   };
 
   const signOut = async () => {
     try {
-      // Очищаем локальный профиль перед выходом
-      await clearLocalProfile();
-      
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await axios.post(`${API_URL}/sign-out`, { access_token: state.session?.access_token });
+      setState({ user: null, session: null, loading: false });
     } catch (error: any) {
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка выхода');
     }
   };
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
+      await axios.post(`${API_URL}/reset-password`, { email });
     } catch (error: any) {
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка сброса пароля');
     }
   };
 
   const updatePassword = async (newPassword: string) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (error) throw error;
+      await axios.post(`${API_URL}/update-password`, { access_token: state.session?.access_token, newPassword });
     } catch (error: any) {
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка смены пароля');
     }
   };
 
-  // Получение профиля из локального хранилища
   const getProfile = async (): Promise<ProfileData | null> => {
+    if (!state.user) return null;
     try {
-      if (!state.user) throw new Error('User not authenticated');
-      
-      const profileJson = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${state.user.id}`);
-      
-      if (profileJson) {
-        return JSON.parse(profileJson) as ProfileData;
-      }
-      
-      // Если профиль не найден, создаем базовый профиль
-      const newProfile: ProfileData = {
-        id: state.user.id,
-        username: state.user.email?.split('@')[0] || 'Пользователь',
-        updated_at: new Date().toISOString(),
-      };
-      
-      await AsyncStorage.setItem(`${PROFILE_STORAGE_KEY}_${state.user.id}`, JSON.stringify(newProfile));
-      return newProfile;
-      
+      const { data } = await axios.get(`${API_URL}/profile`, { params: { user_id: state.user.id } });
+      return data;
     } catch (error: any) {
-      console.error('Ошибка при получении профиля:', error.message);
-      Alert.alert('Ошибка', `Не удалось загрузить профиль: ${error.message}`);
       return null;
     }
   };
 
-  // Обновление профиля в локальном хранилище
   const updateProfile = async (data: ProfileData) => {
+    if (!state.user) return;
     try {
-      if (!state.user) throw new Error('User not authenticated');
-      
-      console.log('Обновление локального профиля:', data);
-      
-      // Получаем текущий профиль
-      const profileJson = await AsyncStorage.getItem(`${PROFILE_STORAGE_KEY}_${state.user.id}`);
-      let currentProfile: ProfileData = profileJson 
-        ? JSON.parse(profileJson) 
-        : { id: state.user.id };
-      
-      // Обновляем данные профиля
-      const updatedProfile: ProfileData = {
-        ...currentProfile,
-        ...data,
-        updated_at: new Date().toISOString(),
-      };
-      
-      // Сохраняем обновленный профиль
-      await AsyncStorage.setItem(
-        `${PROFILE_STORAGE_KEY}_${state.user.id}`, 
-        JSON.stringify(updatedProfile)
-      );
-      
-      console.log('Профиль успешно обновлен локально');
-      
+      await axios.post(`${API_URL}/profile`, { user_id: state.user.id, data });
     } catch (error: any) {
-      console.error('Ошибка при обновлении профиля:', error);
-      Alert.alert('Ошибка', `Не удалось обновить профиль: ${error.message}`);
-      throw error;
+      throw new Error(error?.response?.data?.error || 'Ошибка обновления профиля');
     }
   };
 

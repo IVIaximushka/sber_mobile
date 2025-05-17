@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/lib/authContext';
-import { supabase } from '@/lib/supabase';
 
 // Импорт компонентов профиля
 import { ProfileHeader } from '@/app/components/profile/ProfileHeader';
@@ -16,7 +15,7 @@ import { styles } from '@/app/components/profile/ProfileStyles';
 import { ProfileData, PRIMARY_COLOR } from '@/app/components/profile/ProfileData';
 
 export default function ProfileScreen() {
-  const { state, getProfile } = useAuth();
+  const { state, getProfile, signOut } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData>({});
@@ -55,15 +54,7 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      
-      // Выход из аккаунта через Supabase
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-
-      // Перенаправление на экран входа
+      await signOut();
       router.replace('/(auth)/signin');
     } catch (error) {
       Alert.alert('Ошибка', (error as Error).message);
