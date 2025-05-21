@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
-import { Users, Calendar, ThumbsUp, ThumbsDown, ChevronLeft } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal, TextInput } from 'react-native';
+import { Users, Calendar, ThumbsUp, ThumbsDown, ChevronLeft, Plus } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 
@@ -49,6 +49,9 @@ function Proposals({ onBackPress }: ProposalsScreenProps) {
   const router = useRouter();
   const [selectedProposal, setSelectedProposal] = useState<typeof residentProposals[0] | null>(null);
   const [proposalVotes, setProposalVotes] = useState<Record<string, 'for' | 'against' | null>>({});
+  const [isNewProposalModalVisible, setIsNewProposalModalVisible] = useState(false);
+  const [newProposalTitle, setNewProposalTitle] = useState('');
+  const [newProposalDescription, setNewProposalDescription] = useState('');
 
   const handleVote = (proposalId: string, vote: 'for' | 'against') => {
     setProposalVotes(prev => ({
@@ -73,6 +76,27 @@ function Proposals({ onBackPress }: ProposalsScreenProps) {
     }
   };
 
+  const handleAddProposal = () => {
+    if (newProposalTitle.trim() && newProposalDescription.trim()) {
+      const newProposal = {
+        id: String(residentProposals.length + 1),
+        title: newProposalTitle.trim(),
+        description: newProposalDescription.trim(),
+        author: 'Вы',
+        date: new Date().toLocaleDateString('ru-RU'),
+        votesFor: 0,
+        votesAgainst: 0,
+        status: 'active',
+        image: require('../../../assets/images/new_propos.jpg'),
+      };
+      
+      residentProposals.unshift(newProposal);
+      setNewProposalTitle('');
+      setNewProposalDescription('');
+      setIsNewProposalModalVisible(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -82,6 +106,11 @@ function Proposals({ onBackPress }: ProposalsScreenProps) {
           <ChevronLeft size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Предложения жильцов</Text>
+        <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => setIsNewProposalModalVisible(true)}>
+          <Plus size={24} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
@@ -207,6 +236,57 @@ function Proposals({ onBackPress }: ProposalsScreenProps) {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={isNewProposalModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setIsNewProposalModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Новое предложение</Text>
+              <TouchableOpacity 
+                onPress={() => setIsNewProposalModalVisible(false)} 
+                style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>×</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalScroll}>
+              <View style={styles.formContainer}>
+                <Text style={styles.formLabel}>Название</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={newProposalTitle}
+                  onChangeText={setNewProposalTitle}
+                  placeholder="Введите название предложения"
+                  placeholderTextColor="#8E8E93"
+                />
+                <Text style={styles.formLabel}>Описание</Text>
+                <TextInput
+                  style={[styles.formInput, styles.formTextArea]}
+                  value={newProposalDescription}
+                  onChangeText={setNewProposalDescription}
+                  placeholder="Опишите ваше предложение"
+                  placeholderTextColor="#8E8E93"
+                  multiline
+                  numberOfLines={6}
+                  textAlignVertical="top"
+                />
+                <TouchableOpacity 
+                  style={[
+                    styles.submitButton,
+                    (!newProposalTitle.trim() || !newProposalDescription.trim()) && styles.submitButtonDisabled
+                  ]}
+                  onPress={handleAddProposal}
+                  disabled={!newProposalTitle.trim() || !newProposalDescription.trim()}>
+                  <Text style={styles.submitButtonText}>Опубликовать</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -322,15 +402,16 @@ const styles = StyleSheet.create({
     backgroundColor: PRIMARY_COLOR,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
   },
   modalContent: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
   },
   modalImage: {
     width: '100%',
@@ -420,6 +501,47 @@ const styles = StyleSheet.create({
   },
   modalVoteButtonTextActive: {
     color: '#FFFFFF',
+  },
+  addButton: {
+    marginLeft: 'auto',
+    padding: 8,
+  },
+  formContainer: {
+    padding: 16,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 8,
+  },
+  formInput: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#000000',
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+  },
+  formTextArea: {
+    height: 120,
+  },
+  submitButton: {
+    backgroundColor: PRIMARY_COLOR,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#E5E5EA',
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

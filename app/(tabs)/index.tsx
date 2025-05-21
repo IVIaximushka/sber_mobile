@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/authContext';
 import NearbyScreen from '@/app/components/index/nearby';
 import ProposalsScreen from '@/app/components/index/proposals';
 import NotificationsScreen from '@/app/components/index/notifications';
+import DonationsScreen from '@/app/components/index/donations';
 
 const PRIMARY_COLOR = '#8B1E3F';
 const { width } = Dimensions.get('window');
@@ -110,7 +111,7 @@ const fundraisingCampaigns = [
   },
 ];
 
-type ScreenType = 'home' | 'nearby' | 'proposals' | 'notifications';
+type ScreenType = 'home' | 'nearby' | 'proposals' | 'notifications' | 'donations';
 
 type Styles = {
   container: ViewStyle;
@@ -305,6 +306,10 @@ export default function HomeScreen() {
     setCurrentScreen('notifications');
   };
 
+  const handleNavigateToDonations = () => {
+    setCurrentScreen('donations');
+  };
+
   const handleBackToHome = () => {
     setCurrentScreen('home');
   };
@@ -373,6 +378,10 @@ export default function HomeScreen() {
     return <NotificationsScreen onBackPress={handleBackToHome} />;
   }
 
+  if (currentScreen === 'donations') {
+    return <DonationsScreen onBackPress={handleBackToHome} />;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <ImageBackground
@@ -409,7 +418,7 @@ export default function HomeScreen() {
             <Text style={styles.emergenciesTitle}>Важные события</Text>
           </View>
           {emergencies.map((emergency) => (
-            <TouchableOpacity key={emergency.id} style={styles.emergencyCard}>
+            <View key={emergency.id} style={styles.emergencyCard}>
               <View style={[styles.emergencyIconContainer, { backgroundColor: emergency.color }]}>
                 <emergency.icon size={24} color={PRIMARY_COLOR} />
               </View>
@@ -427,8 +436,7 @@ export default function HomeScreen() {
                   </View>
                 </View>
               </View>
-              <ChevronRight size={24} color="#8E8E93" />
-            </TouchableOpacity>
+            </View>
           ))}
         </View>
       )}
@@ -473,7 +481,8 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Сборы и пожертвования</Text>
           </View>
           <TouchableOpacity 
-            style={styles.seeAllButton}>
+            style={styles.seeAllButton}
+            onPress={handleNavigateToDonations}>
             <ChevronRight size={20} color={PRIMARY_COLOR} />
           </TouchableOpacity>
         </View>
@@ -487,7 +496,8 @@ export default function HomeScreen() {
             return (
               <TouchableOpacity 
                 key={campaign.id} 
-                style={styles.donationCard}>
+                style={styles.donationCard}
+                onPress={handleNavigateToDonations}>
                 <Image source={campaign.image} style={styles.donationImage} />
                 <View style={styles.donationContent}>
                   <Text style={styles.donationTitle}>{campaign.title}</Text>
@@ -508,9 +518,6 @@ export default function HomeScreen() {
                       из {campaign.targetAmount.toLocaleString()} ₽
                     </Text>
                   </View>
-                  <TouchableOpacity style={styles.donateButton}>
-                    <Text style={styles.donateButtonText}>Пожертвовать</Text>
-                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             );
@@ -1064,15 +1071,16 @@ const styles = StyleSheet.create<Styles>({
     backgroundColor: PRIMARY_COLOR,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#FFFFFF',
   },
   modalContent: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '80%',
   },
   modalImage: {
     width: '100%',
