@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'rea
 import { Heart, ChevronLeft } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { PaymentPage } from '../payment/PaymentPage';
+import { PaymentPage } from './paymentPage';
 
 const PRIMARY_COLOR = '#8B1E3F';
 

@@ -547,7 +547,7 @@ export default function HomeScreen() {
             <TouchableOpacity 
               key={proposal.id} 
               style={styles.proposalCard}
-              onPress={() => handleProposalPress(proposal)}>
+              onPress={handleNavigateToProposals}>
               <Image source={proposal.image} style={styles.proposalImage} />
               <View style={styles.proposalContent}>
                 <Text style={styles.proposalTitle}>{proposal.title}</Text>
