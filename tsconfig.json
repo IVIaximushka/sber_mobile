@@ -6,7 +6,8 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "typeRoots": ["./types", "./node_modules/@types"]
+    "typeRoots": ["./types", "./node_modules/@types"],
+    "esModuleInterop": true
   },
   "include": [
     "**/*.ts",

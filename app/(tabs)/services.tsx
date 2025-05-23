@@ -4,7 +4,7 @@ import { View, ScrollView } from 'react-native';
 // Импорт данных и стилей
 import { styles } from '@/app/components/services/ServiceStyles';
 import { 
-  paymentServices, 
+  paymentServices as initialPaymentServices, 
   additionalServices,
   PaymentService,
   AdditionalService 
@@ -22,6 +22,7 @@ export default function ServicesScreen() {
   const [selectedAdditionalService, setSelectedAdditionalService] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [paymentServices, setPaymentServices] = useState<PaymentService[]>(initialPaymentServices);
   
   const filteredServices = searchQuery.length > 0
     ? additionalServices.filter(service => 
@@ -58,6 +59,14 @@ export default function ServicesScreen() {
     setSearchQuery('');
   };
 
+  const handlePaymentStatusChange = (id: string, isPaid: boolean, paymentMethod: 'card' | 'sber') => {
+    setPaymentServices(prevServices =>
+      prevServices.map(service =>
+        service.id === id ? { ...service, isPaid, paymentMethod } : service
+      )
+    );
+  };
+
   // Отображение деталей выбранной дополнительной услуги
   if (selectedAdditionalService) {
     const service = additionalServices.find(s => s.id === selectedAdditionalService);
@@ -80,6 +89,7 @@ export default function ServicesScreen() {
       <PaymentServiceDetails
         service={service}
         onBack={handleBackFromPaymentService}
+        onPaymentStatusChange={handlePaymentStatusChange}
       />
     );
   }
@@ -126,6 +136,7 @@ export default function ServicesScreen() {
                 key={index} 
                 service={service}
                 onSelect={handleSelectPaymentService}
+                onPaymentStatusChange={handlePaymentStatusChange}
               />
             ))}
           </View>

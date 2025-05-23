@@ -11,6 +11,8 @@ export interface PaymentService {
   title: string;
   amount: string;
   details: PaymentServiceDetail[];
+  isPaid: boolean;
+  paymentMethod?: 'card' | 'sber';
 }
 
 export interface AdditionalServiceAdvantage {
@@ -42,7 +44,8 @@ export const paymentServices: PaymentService[] = [
       { name: 'Вода', amount: '678.90 ₽' },
       { name: 'Электричество', amount: '890.12 ₽' },
       { name: 'Газ', amount: '653.20 ₽' }
-    ]
+    ],
+    isPaid: false
   },
   { 
     id: 'internet', 
@@ -52,7 +55,8 @@ export const paymentServices: PaymentService[] = [
     details: [
       { name: 'Абонентская плата', amount: '650.00 ₽' },
       { name: 'Дополнительные услуги', amount: '100.00 ₽' }
-    ]
+    ],
+    isPaid: false
   },
   { 
     id: 'security', 
@@ -62,7 +66,8 @@ export const paymentServices: PaymentService[] = [
     details: [
       { name: 'Охрана квартиры', amount: '800.00 ₽' },
       { name: 'Мониторинг', amount: '400.00 ₽' }
-    ]
+    ],
+    isPaid: false
   },
   { 
     id: 'kindergarten', 
@@ -73,7 +78,8 @@ export const paymentServices: PaymentService[] = [
       { name: 'Питание', amount: '1,500.00 ₽' },
       { name: 'Образовательные услуги', amount: '800.00 ₽' },
       { name: 'Дополнительные занятия', amount: '200.00 ₽' }
-    ]
+    ],
+    isPaid: false
   },
 ];
 
