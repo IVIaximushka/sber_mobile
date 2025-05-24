@@ -383,7 +383,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false} overScrollMode="never">
       <ImageBackground
         source={require('../../assets/images/street.jpg')}
         style={styles.headerBackground}
@@ -455,6 +455,8 @@ export default function HomeScreen() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          overScrollMode="never"
           style={styles.servicesScroll}
           onScroll={(e) => setScrollPosition(e.nativeEvent.contentOffset.x)}
           scrollEventThrottle={16}>
@@ -490,6 +492,8 @@ export default function HomeScreen() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          overScrollMode="never"
           style={styles.donationsScroll}>
           {fundraisingCampaigns.map((campaign) => {
             const progress = (campaign.currentAmount / campaign.targetAmount) * 100;
@@ -542,6 +546,8 @@ export default function HomeScreen() {
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+          overScrollMode="never"
           style={styles.proposalsScroll}>
           {residentProposals.map((proposal) => (
             <TouchableOpacity 
@@ -610,7 +616,7 @@ export default function HomeScreen() {
                     <Text style={styles.closeButtonText}>×</Text>
                   </TouchableOpacity>
                 </View>
-                <ScrollView style={styles.modalScroll}>
+                <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false} overScrollMode="never">
                   <View style={styles.modalInfo}>
                     <View style={styles.modalDetailItem}>
                       <Users size={16} color="#8E8E93" />
