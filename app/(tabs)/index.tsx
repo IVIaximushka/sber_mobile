@@ -762,7 +762,6 @@ const styles = StyleSheet.create<Styles>({
     fontSize: 20,
     fontWeight: '600',
     color: PRIMARY_COLOR,
-    marginBottom: 16,
   },
   viewAllButton: {
     flexDirection: 'row',
@@ -993,6 +992,7 @@ const styles = StyleSheet.create<Styles>({
   proposalsContainer: {
     padding: 20,
     backgroundColor: '#FFFFFF',
+    marginTop: 16,
   },
   proposalsScroll: {
     marginTop: 16,
@@ -1180,6 +1180,7 @@ const styles = StyleSheet.create<Styles>({
   donationsContainer: {
     padding: 20,
     backgroundColor: '#FFFFFF',
+    marginTop: 16,
   },
   donationsScroll: {
     marginTop: 16,
